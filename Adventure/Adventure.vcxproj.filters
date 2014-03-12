@@ -5,10 +5,14 @@
     <ClCompile Include="Frontend.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="stb_image.cpp" />
+    <ClCompile Include="Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="MinWin.hpp" />
     <ClInclude Include="Phase.hpp" />
+    <ClInclude Include="stb_image.hpp" />
+    <ClInclude Include="Texture.hpp" />
   </ItemGroup>
 </Project>
