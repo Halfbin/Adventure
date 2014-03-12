@@ -1,0 +1,16 @@
+[submodule "Rk-Core"]
+	path = Rk-Core
+	url = https://github.com/Halfbin/Rk-Core.git
+	branch = master
+[submodule "Rk-RawIO"]
+	path = Rk-RawIO
+	url = https://github.com/Halfbin/Rk-RawIO.git
+	branch = master
+[submodule "Rk-TextIO"]
+	path = Rk-TextIO
+	url = https://github.com/Halfbin/Rk-TextIO.git
+	branch = master
+[submodule "Rk-Math"]
+	path = Rk-Math
+	url = https://github.com/Halfbin/Rk-Math.git
+	branch = master
