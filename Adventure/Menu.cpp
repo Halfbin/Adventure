@@ -19,6 +19,11 @@ namespace Ad
 
     float t0, t1;
 
+    void input (const Event*, uint, const KeyState*)
+    {
+
+    }
+
     void tick (float time, float step)
     {
       t0 = time;

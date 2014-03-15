@@ -16,7 +16,7 @@ smooth out vec2 xformed_tcoords;
 void main ()
 {
   xformed_vertpos = model_to_clip * vec4 (attrib_vertpos, 0, 1);
-  xformed_tcoords = tcoords_scale * (attrib_vertpos + attrib_tcoords);
+  xformed_tcoords = attrib_tcoords;
 
   gl_Position = xformed_vertpos;
 }

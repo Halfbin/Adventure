@@ -5,6 +5,7 @@
 #include "Window.hpp"
 
 #include "GLError.hpp"
+#include "Input.hpp"
 
 #include <Rk/unicode_convert.hpp>
 #include <Rk/exception.hpp>
@@ -12,6 +13,8 @@
 
 #include <GL/glew.h>
 #include <GL/wglew.h>
+
+#include <vector>
 
 #include "MinWin.hpp"
 
@@ -27,6 +30,8 @@ namespace Ad
     int width,
         height;
 
+    std::vector <Event> events;
+
     static LRESULT __stdcall window_procedure (HWND, UINT, WPARAM, LPARAM);
     LRESULT wndproc (HWND, UINT, WPARAM, LPARAM);
 
@@ -34,6 +39,38 @@ namespace Ad
     ~Impl ();
 
   };
+
+  namespace
+  {
+    using namespace Keys;
+
+    const Key inv = Keys::invalid;
+
+    const Key keytab [256] = {
+      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      bk_space, tab,      inv,      inv,      inv,      enter,    inv,      inv,
+      inv,      inv,      inv,      pause,    capslock, inv,      inv,      inv,      inv,      inv,      inv,      escape,   inv,      inv,      inv,      inv,
+      spacebar, page_up,  page_dn,  end,      home,     left,     up,       right,    down,     inv,      inv,      inv,      prt_scrn, insert,   del,      inv,
+      top_0,    top_1,    top_2,    top_3,    top_4,    top_5,    top_6,    top_7,    top_8,    top_9,    inv,      inv,      inv,      inv,      inv,      inv,
+      inv,      alpha_a,  alpha_b,  alpha_c,  alpha_d,  alpha_e,  alpha_f,  alpha_g,  alpha_h,  alpha_i,  alpha_j,  alpha_k,  alpha_l,  alpha_m,  alpha_n,  alpha_o,
+      alpha_p,  alpha_q,  alpha_r,  alpha_s,  alpha_t,  alpha_u,  alpha_v,  alpha_w,  alpha_x,  alpha_y,  alpha_z,  inv,      inv,      inv,      inv,      inv,
+      np_0,     np_1,     np_2,     np_3,     np_4,     np_5,     np_6,     np_7,     np_8,     np_9,     np_mul,   np_plus,  np_minus, np_point, np_div,   inv,
+      f1,       f2,       f3,       f4,       f5,       f6,       f7,       f8,       f9,       f10,      f11,      f12,      f13,      f14,      f15,      f16,
+      f17,      f18,      f19,      f20,      f21,      f22,      f23,      f24,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,
+      num_lock, scr_lock, inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,
+      lt_shift, rt_shift, lt_ctrl,  rt_ctrl,  inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,
+      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      semi_col, equals,   comma,    dash,     period,   slash,
+      backtick, inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,
+      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      lt_brace, bk_slash, rt_brace, apos,     hash,
+      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,
+      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv,      inv
+    };
+
+    Key translate_vkey (u8 vkey)
+    {
+      return keytab [vkey & 0xff];
+    }
+
+  } // local
 
   LRESULT Window::Impl::wndproc (HWND src, UINT msg, WPARAM wp, LPARAM lp)
   {
@@ -46,6 +83,24 @@ namespace Ad
       case WM_SIZE:
         width  = LOWORD (lp);
         height = HIWORD (lp);
+      return 0;
+
+      case WM_KEYDOWN:
+      {
+        auto key = translate_vkey (wp & 0xff);
+        if (key == Key::invalid)
+          break;
+        events.push_back (Event (Events::key_down, KeyEvent { key }));
+      }
+      return 0;
+
+      case WM_KEYUP:
+      {
+        auto key = translate_vkey (wp & 0xff);
+        if (key == Key::invalid)
+          break;
+        events.push_back (Event (Events::key_up, KeyEvent { key }));
+      }
       return 0;
 
       default:;
@@ -325,6 +380,34 @@ namespace Ad
     MSG msg;
     while (PeekMessageW (&msg, nullptr, 0, 0, PM_REMOVE))
       DispatchMessageW (&msg);
+  }
+
+  void Window::update_keys (KeyState* keys)
+  {
+    u8 state [256];
+    GetKeyboardState (state);
+
+    for (int i = 0; i != 256; i++)
+    {
+      auto k = translate_vkey (i);
+      if (k == Keys::invalid)
+        continue;
+
+      bool down    = (state [i] & 0x80) != 0;
+      bool locked  = (state [i] & 0x01) != 0;
+      bool changed = down != keys [k].down ();
+      keys [k] = KeyState (down, changed, locked);
+    }
+  }
+
+  const Event* Window::events () const
+  {
+    return impl -> events.data ();
+  }
+
+  uint Window::event_count () const
+  {
+    return impl -> events.size ();
   }
 
   void Window::flip ()

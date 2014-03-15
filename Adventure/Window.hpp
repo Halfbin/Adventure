@@ -6,6 +6,8 @@
 
 #include <Rk/string_ref.hpp>
 
+#include "Input.hpp"
+
 #include <functional>
 
 namespace Ad
@@ -21,8 +23,14 @@ namespace Ad
 
     void on_close (std::function <void ()> func);
 
-    void show ();
     void pump ();
+
+    void update_keys (KeyState* keys);
+
+    const Event* events      () const;
+    uint         event_count () const;
+
+    void show ();
     void flip ();
 
     int width  () const;

@@ -5,6 +5,7 @@
 #include "Phase.hpp"
 
 #include "Texture.hpp"
+#include "Player.hpp"
 
 #include <Rk/transform.hpp>
 
@@ -23,7 +24,7 @@ namespace Ad
          h = float (ih);
 
     return Rk::matrix_rows {
-      v4f { 2 / w,    0,    0,  0 }, 
+      v4f { 2 / w,    0,    0,  0 },
       v4f {   0,   -2 / h,  0,  0 },
       v4f {   0,      0,   -1,  0 },
       v4f {   0,      0,    0,  1 }
@@ -33,14 +34,23 @@ namespace Ad
   class PlayPhase :
     public Phase
   {
+    Player::Ptr player;
+
     Texture::Ptr cobble;
 
     float t0, t1;
+
+    void input (const Event* events, uint count, const KeyState* keys)
+    {
+      player -> input (events, count, keys);
+    }
 
     void tick (float time, float step)
     {
       t0 = time;
       t1 = time + step;
+
+      player -> tick (time, step);
     }
 
     void render (Frame& frame)
@@ -54,20 +64,21 @@ namespace Ad
       frame.set_world_to_eye (world_to_eye);
 
       float geom [] = {
-        -240, -320, 0, 0,
-         240, -320, 0, 0,
-         240,  320, 0, 0,
-        -240,  320, 0, 0
+        -240, -320, -3.75, -4,
+         240, -320,  3.75, -4,
+         240,  320,  3.75,  4,
+        -240,  320, -3.75,  4
       };
 
-      auto theta = 0.2 * Rk::lerp (t0, t1, frame.alpha);
+      frame.draw (cobble -> name (), geom, 4, v2f (0, 0), cxf (1, 0), v2f (1/64.f, 1/64.f));
 
-      frame.draw (cobble -> name (), geom, 4, v2f (0, 0), rotation (theta), v2f (1/64.f, 1/64.f));
+      player -> draw (frame);
     }
 
   public:
     PlayPhase ()
     {
+      player = create_player ();
       cobble = Texture::create ("Art/Flags1a.png", TexFlags::nearest);
     }
 

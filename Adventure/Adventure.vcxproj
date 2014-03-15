@@ -100,8 +100,10 @@
     <ClInclude Include="DefaultShader.hpp" />
     <ClInclude Include="Frame.hpp" />
     <ClInclude Include="GLError.hpp" />
+    <ClInclude Include="Input.hpp" />
     <ClInclude Include="MinWin.hpp" />
     <ClInclude Include="Phase.hpp" />
+    <ClInclude Include="Player.hpp" />
     <ClInclude Include="Render.hpp" />
     <ClInclude Include="Shader.hpp" />
     <ClInclude Include="stb_image.hpp" />

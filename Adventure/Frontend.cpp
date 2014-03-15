@@ -18,105 +18,109 @@ namespace Ad
     __declspec(dllimport) i32 __stdcall QueryPerformanceCounter   (u64*);
   }
 
-  class Clock
+  namespace
   {
-    u64 prev_ticks,
-        ticks_per_second;
-
-  public:
-    Clock ()
+    class Clock
     {
-      QueryPerformanceFrequency (&ticks_per_second);
-    }
+      u64 prev_ticks,
+          ticks_per_second;
 
-    u64 ticks () const
+    public:
+      Clock ()
+      {
+        QueryPerformanceFrequency (&ticks_per_second);
+      }
+
+      u64 ticks () const
+      {
+        u64 cur_ticks;
+        QueryPerformanceCounter (&cur_ticks);
+        return cur_ticks;
+      }
+
+      u64 frequency () const
+      {
+        return ticks_per_second;
+      }
+
+    };
+
+    class Syncer
     {
-      u64 cur_ticks;
-      QueryPerformanceCounter (&cur_ticks);
-      return cur_ticks;
-    }
+      Clock  clock;
+      u64    prev_ticks;
+      float  sim_time,
+             delta,
+             accum,
+             catchup,
+             wrap;
+      bool   ticking;
 
-    u64 frequency () const
-    {
-      return ticks_per_second;
-    }
+    public:
+      Syncer (float tick_frequency, float max_catchup = 0.25f, float wrap_interval = 12000.0f) :
+        delta   (1 / tick_frequency),
+        ticking (false),
+        catchup (max_catchup),
+        wrap    (wrap_interval)
+      {
+        restart ();
+      }
 
-  };
+      void restart ()
+      {
+        sim_time = 0;
+        accum    = 0;
 
-  class Syncer
-  {
-    Clock  clock;
-    u64    prev_ticks;
-    float  sim_time,
-           delta,
-           accum,
-           catchup,
-           wrap;
-    bool   ticking;
+        prev_ticks = clock.ticks ();
+      }
 
-  public:
-    Syncer (float tick_frequency, float max_catchup = 0.25f, float wrap_interval = 12000.0f) :
-      delta   (1 / tick_frequency),
-      ticking (false),
-      catchup (max_catchup),
-      wrap    (wrap_interval)
-    {
-      restart ();
-    }
+      float interval () const
+      {
+        return delta;
+      }
 
-    void restart ()
-    {
-      sim_time = 0;
-      accum    = 0;
+      float time () const
+      {
+        return sim_time;
+      }
 
-      prev_ticks = clock.ticks ();
-    }
+      float alpha () const
+      {
+        return accum / delta;
+      }
 
-    float interval () const
-    {
-      return delta;
-    }
+      void update_clock ()
+      {
+        auto ticks = clock.ticks ();
+        auto delta_ticks = ticks - prev_ticks;
+        prev_ticks = ticks;
 
-    float time () const
-    {
-      return sim_time;
-    }
+        auto delta_real_time = float (delta_ticks) / float (clock.frequency ());
 
-    float alpha () const
-    {
-      return accum / delta;
-    }
+        delta_real_time = Rk::clamp (delta_real_time, 0.0f, catchup);
+        accum += delta_real_time;
 
-    void update_clock ()
-    {
-      auto ticks = clock.ticks ();
-      auto delta_ticks = ticks - prev_ticks;
-      prev_ticks = ticks;
+        ticking = false;
+      }
 
-      auto delta_real_time = float (delta_ticks) / float (clock.frequency ());
+      bool need_tick () const
+      {
+        return accum >= delta;
+      }
 
-      delta_real_time = Rk::clamp (delta_real_time, 0.0f, catchup);
-      accum += delta_real_time;
+      void tick_done ()
+      {
+        accum    -= delta;
+        sim_time += delta;
 
-      ticking = false;
-    }
+        // Wrap predictably
+        if (sim_time >= wrap)
+          sim_time -= wrap;
+      }
 
-    bool need_tick () const
-    {
-      return accum >= delta;
-    }
+    };
 
-    void tick_done ()
-    {
-      accum    -= delta;
-      sim_time += delta;
-
-      // Wrap predictably
-      if (sim_time >= wrap)
-        sim_time -= wrap;
-    }
-
-  };
+  } // local
 
   class Frontend
   {
@@ -141,13 +145,16 @@ namespace Ad
       win.show ();
       syncer.restart ();
       Renderer renderer;
+      KeyState keys [Keys::count];
 
       while (running)
       {
         win.pump ();
 
         // Update input
-
+        win.update_keys (keys);
+        phase -> input (win.events (), win.event_count (), keys);
+        
         // Update clock
         syncer.update_clock ();
 

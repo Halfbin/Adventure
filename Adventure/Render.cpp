@@ -64,7 +64,7 @@ namespace Ad
     glClearColor (cc.x, cc.y, cc.z, cc.w);
     glClear (GL_COLOR_BUFFER_BIT);
 
-    auto w2c = frame.world_to_eye * frame.eye_to_clip;
+    auto w2c = frame.eye_to_clip * frame.world_to_eye;
 
     glActiveTexture (GL_TEXTURE0 + shader.tex_unit);
 
@@ -84,6 +84,9 @@ namespace Ad
 
     glDisable (GL_CULL_FACE);
 
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable (GL_BLEND);
+
     for (auto item : frame.draw_items)
     {
       auto rot = item.rotate;
@@ -99,13 +102,13 @@ namespace Ad
         v4f { 0,  0, 0,   1   }
       };
 
-      auto m2c = m2w * w2c;
+      auto m2c = w2c * m2w;
 
-      glUniformMatrix4fv (shader.model_to_clip (), 1, false, reinterpret_cast <const float*> (&m2c));
+      glUniformMatrix4fv (shader.model_to_clip (), 1, true, reinterpret_cast <const float*> (&m2c));
       check_gl ("glUniformMatrix4fv failed");
 
-      glUniform2f (shader.tcoords_scale (), item.tc_scale.x, item.tc_scale.y);
-      check_gl ("glUniform2f failed");
+    /*glUniform2f (shader.tcoords_scale (), item.tc_scale.x, item.tc_scale.y);
+      check_gl ("glUniform2f failed");*/
 
       glBindTexture (GL_TEXTURE_2D, item.texture);
       check_gl ("glBindTexture failed");
