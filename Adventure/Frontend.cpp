@@ -2,11 +2,11 @@
 // Adventure
 //
 
+#include <Rk/memory.hpp>
 #include <Rk/clamp.hpp>
 #include <Rk/types.hpp>
 
-#include <GL/glew.h>
-
+#include "Render.hpp"
 #include "Window.hpp"
 #include "Phase.hpp"
 
@@ -20,45 +20,46 @@ namespace Ad
 
   class Clock
   {
-    u64   start;
-    float ticks_per_second;
+    u64 prev_ticks,
+        ticks_per_second;
 
   public:
     Clock ()
     {
-      u64 perf_freq;
-      QueryPerformanceFrequency (&perf_freq);
-      ticks_per_second = float (perf_freq);
-      restart ();
+      QueryPerformanceFrequency (&ticks_per_second);
     }
 
-    void restart ()
+    u64 ticks () const
     {
-      QueryPerformanceCounter (&start);
+      u64 cur_ticks;
+      QueryPerformanceCounter (&cur_ticks);
+      return cur_ticks;
     }
 
-    __forceinline float time () const
+    u64 frequency () const
     {
-      u64 count;
-      QueryPerformanceCounter (&count);
-      return float (count - start) / ticks_per_second;
+      return ticks_per_second;
     }
 
   };
 
   class Syncer
   {
-    Clock clock;
-    float prev_real_time,
-          sim_time,
-          delta,
-          accum;
-    bool  ticking;
+    Clock  clock;
+    u64    prev_ticks;
+    float  sim_time,
+           delta,
+           accum,
+           catchup,
+           wrap;
+    bool   ticking;
 
   public:
-    Syncer (float tick_frequency) :
+    Syncer (float tick_frequency, float max_catchup = 0.25f, float wrap_interval = 12000.0f) :
       delta   (1 / tick_frequency),
-      ticking (false)
+      ticking (false),
+      catchup (max_catchup),
+      wrap    (wrap_interval)
     {
       restart ();
     }
@@ -68,7 +69,7 @@ namespace Ad
       sim_time = 0;
       accum    = 0;
 
-      prev_real_time = clock.time ();
+      prev_ticks = clock.ticks ();
     }
 
     float interval () const
@@ -88,27 +89,31 @@ namespace Ad
 
     void update_clock ()
     {
-      float real_time = clock.time ();
-      float delta_real_time = real_time - prev_real_time;
-      prev_real_time = real_time;
+      auto ticks = clock.ticks ();
+      auto delta_ticks = ticks - prev_ticks;
+      prev_ticks = ticks;
 
-      delta_real_time = Rk::clamp (delta_real_time, 0.0f, 0.25f);
+      auto delta_real_time = float (delta_ticks) / float (clock.frequency ());
+
+      delta_real_time = Rk::clamp (delta_real_time, 0.0f, catchup);
       accum += delta_real_time;
 
       ticking = false;
     }
 
-    bool tick ()
+    bool need_tick () const
     {
-      if (ticking)
-      {
-        accum    -= delta;
-        sim_time += delta;
-      }
+      return accum >= delta;
+    }
 
-      ticking = accum >= delta;
+    void tick_done ()
+    {
+      accum    -= delta;
+      sim_time += delta;
 
-      return ticking;
+      // Wrap predictably
+      if (sim_time >= wrap)
+        sim_time -= wrap;
     }
 
   };
@@ -134,6 +139,8 @@ namespace Ad
     {
       running = true;
       win.show ();
+      syncer.restart ();
+      Renderer renderer;
 
       while (running)
       {
@@ -145,12 +152,16 @@ namespace Ad
         syncer.update_clock ();
 
         // Do tick(s)
-        while (syncer.tick ())
+        while (syncer.need_tick ())
+        {
           phase -> tick (syncer.time (), syncer.interval ());
+          syncer.tick_done ();
+        }
 
         // Render AV
-        glViewport (0, 0, win.width (), win.height ());
-        phase -> render (win.width (), win.height ());
+        auto& frame = renderer.begin (win.width (), win.height (), syncer.alpha ());
+        phase -> render (frame);
+        renderer.end ();
         win.flip ();
       }
     }
@@ -159,8 +170,6 @@ namespace Ad
 
   void true_main ()
   {
-    glewInit ();
-
     Frontend fe;
     fe.run ();
   }

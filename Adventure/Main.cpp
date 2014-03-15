@@ -13,6 +13,7 @@ namespace Ad
   extern "C" int WINAPI WinMain (HINSTANCE, HINSTANCE, LPSTR, UINT) try
   {
     true_main ();
+    return 0;
   }
   catch (std::exception& e)
   {

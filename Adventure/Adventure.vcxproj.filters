@@ -7,6 +7,11 @@
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="Play.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="DefaultShader.cpp" />
+    <ClCompile Include="Render.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.hpp" />
@@ -14,5 +19,15 @@
     <ClInclude Include="Phase.hpp" />
     <ClInclude Include="stb_image.hpp" />
     <ClInclude Include="Texture.hpp" />
+    <ClInclude Include="Shader.hpp" />
+    <ClInclude Include="DefaultShader.hpp" />
+    <ClInclude Include="Frame.hpp" />
+    <ClInclude Include="Buffer.hpp" />
+    <ClInclude Include="Render.hpp" />
+    <ClInclude Include="GLError.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Default-Vert.glsl" />
+    <None Include="Default-Frag.glsl" />
   </ItemGroup>
 </Project>

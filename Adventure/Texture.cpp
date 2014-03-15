@@ -5,6 +5,7 @@
 #include "Texture.hpp"
 
 #include "stb_image.hpp"
+#include "GLError.hpp"
 
 #include <Rk/file_stream.hpp>
 #include <Rk/exception.hpp>
@@ -16,31 +17,63 @@
 
 namespace Ad
 {
-  Texture::Texture (Rk::cstring_ref path)
+  Texture::Texture (Rk::cstring_ref path, int flags)
   {
+    auto target = GL_TEXTURE_2D;
+
     Rk::fio::in_stream file (path);
     std::vector <u8> raw ((u32) file.size ());
     file.read (raw.data (), raw.size ());
     
-    int width, height, comp;
-    auto pixels = stbi_load_from_memory (raw.data (), raw.size (), &width, &height, &comp, 4);
+    int comp, glformat;
+
+    if (flags & TexFlag::alpha)
+    {
+      comp = 1;
+      glformat = GL_ALPHA;
+    }
+    else
+    {
+      comp = 4;
+      glformat = GL_RGBA;
+    }
+
+    int width, height;
+    auto pixels = stbi_load_from_memory (raw.data (), raw.size (), &width, &height, &comp, comp);
 
     if (!pixels)
       throw std::runtime_error ("Error loading texture image");
     auto pixel_guard = Rk::guard ([=] { free (pixels); });
 
     glGenTextures (1, &glname);
-    glBindTexture (GL_TEXTURE_2D, glname);
+    check_gl ("glGenTextures failed");
 
-    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL,  0);
-    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_CLAMP_TO_EDGE);
-    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_CLAMP_TO_EDGE);
+    glBindTexture (target, glname);
+    check_gl ("glBindTexture failed");
 
-    glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    int glwrap;
+    if (flags & TexFlag::clamp)
+      glwrap = GL_CLAMP_TO_EDGE;
+    else
+      glwrap = GL_REPEAT;
 
-    glBindTexture (GL_TEXTURE_2D, 0);
+    int glfilt;
+    if (flags & TexFlag::nearest)
+      glfilt = GL_NEAREST;
+    else
+      glfilt = GL_LINEAR;
+
+    glTexParameteri (target, GL_TEXTURE_MAX_LEVEL,  0);
+    glTexParameteri (target, GL_TEXTURE_MIN_FILTER, glfilt);
+    glTexParameteri (target, GL_TEXTURE_MAG_FILTER, glfilt);
+    glTexParameteri (target, GL_TEXTURE_WRAP_S,     glwrap);
+    glTexParameteri (target, GL_TEXTURE_WRAP_T,     glwrap);
+    check_gl ("glTexParameteri failed");
+
+    glTexImage2D (target, 0, glformat, width, height, 0, glformat, GL_UNSIGNED_BYTE, pixels);
+    check_gl ("glTexImage2D failed");
+
+    glBindTexture (target, 0);
   }
 
   Texture::~Texture ()
