@@ -25,7 +25,6 @@ namespace Ad
     glUniform1i (tex, tex_unit);
 
     model_to_clip_loc = prog.link_uniform ("model_to_clip");
-    //tcoords_scale_loc = prog.link_uniform ("tcoords_scale");
   }
 
   DefaultShader::~DefaultShader () = default;

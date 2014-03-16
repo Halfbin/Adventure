@@ -4,14 +4,33 @@
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="Frontend.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Menu.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="Play.cpp" />
-    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="DefaultShader.cpp" />
     <ClCompile Include="Render.cpp" />
+    <ClCompile Include="Entity.cpp" />
+    <ClCompile Include="Geom.cpp" />
+    <ClCompile Include="DefaultShader.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelShader.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Gusher.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Item.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Play.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.hpp" />
@@ -20,16 +39,49 @@
     <ClInclude Include="stb_image.hpp" />
     <ClInclude Include="Texture.hpp" />
     <ClInclude Include="Shader.hpp" />
-    <ClInclude Include="DefaultShader.hpp" />
     <ClInclude Include="Frame.hpp" />
     <ClInclude Include="Buffer.hpp" />
     <ClInclude Include="Render.hpp" />
     <ClInclude Include="GLError.hpp" />
-    <ClInclude Include="Player.hpp" />
     <ClInclude Include="Input.hpp" />
+    <ClInclude Include="Entity.hpp" />
+    <ClInclude Include="Geom.hpp" />
+    <ClInclude Include="DefaultShader.hpp">
+      <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelShader.hpp">
+      <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Gusher.hpp">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Item.hpp">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.hpp">
+      <Filter>Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Default-Vert.glsl" />
-    <None Include="Default-Frag.glsl" />
+    <None Include="Default-Frag.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Default-Vert.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Model-Vert.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Model-Frag.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{e81e6e03-96e9-4866-81a7-081dc7835bfb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{874f781d-3b2c-4c6f-b94a-6120e0fa489e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

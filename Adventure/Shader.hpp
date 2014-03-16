@@ -2,6 +2,8 @@
 // Adventure
 //
 
+#pragma once
+
 #include <Rk/string_ref.hpp>
 
 #include <memory>

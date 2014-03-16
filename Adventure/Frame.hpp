@@ -6,6 +6,7 @@
 
 #include <Rk/matrix.hpp>
 #include <Rk/memory.hpp>
+#include <Rk/versor.hpp>
 
 #include <complex>
 #include <vector>
@@ -27,10 +28,22 @@ namespace Ad
       v2f  tc_scale;
     };
 
-    mat4f eye_to_clip,
-          world_to_eye;
+    struct ModelItem
+    {
+      uint geom,
+           n_idxs,
+           idx_type;
+      v4f  colour;
+      v3f  trn;
+      vsf  rot;
+      v3f  scale;
+    };
 
-    std::vector <DrawItem> draw_items;
+    mat4f eye_to_clip;
+    v2f   camera;
+
+    std::vector <DrawItem>  draw_items;
+    std::vector <ModelItem> model_items;
 
     u8* buf_ptr;
     u8* buf_end;
@@ -46,9 +59,9 @@ namespace Ad
       eye_to_clip = e2c;
     }
 
-    void set_world_to_eye (mat4f w2e)
+    void set_camera (v2f cam)
     {
-      world_to_eye = w2e;
+      camera = cam;
     }
 
     void draw (uint texture, const float* data, uint count, v2f translate, cxf rotate, v2f tc_scale = v2f (1, 1))
@@ -58,6 +71,17 @@ namespace Ad
         return;
       draw_items.push_back (DrawItem { texture, count, translate, rotate, tc_scale });
       buf_ptr = Rk::copy (buf_ptr, (const u8*) data, bytes);
+    }
+
+    void draw (
+      uint geom, 
+      uint n_idxs, uint idx_type,
+      v4f colour,
+      v3f translate,
+      vsf rotate = identity,
+      v3f scale = { 1.f, 1.f, 1.f })
+    {
+      model_items.push_back (ModelItem { geom, n_idxs, idx_type, colour, translate, rotate, scale });
     }
 
   };

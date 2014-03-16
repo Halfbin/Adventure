@@ -5,7 +5,6 @@
 #version 330 core
 
 uniform mat4 model_to_clip;
-uniform vec2 tcoords_scale;
 
 in vec2 attrib_vertpos;
 in vec2 attrib_tcoords;

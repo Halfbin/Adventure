@@ -17,7 +17,7 @@ namespace Ad
     uint glname;
 
   public:
-    Buffer (size_t reserve)
+    Buffer (size_t size, const void* data = nullptr)
     {
       glGenBuffers (1, &glname);
       check_gl ("glGenBuffers failed");
@@ -25,7 +25,9 @@ namespace Ad
       glBindBuffer (GL_ARRAY_BUFFER, glname);
       check_gl ("glBindBuffer failed");
 
-      glBufferData (GL_ARRAY_BUFFER, reserve, nullptr, GL_STREAM_DRAW);
+      auto mode = data ? GL_STATIC_DRAW : GL_STREAM_DRAW;
+
+      glBufferData (GL_ARRAY_BUFFER, size, data, mode);
       check_gl ("glBufferData failed");
     }
 

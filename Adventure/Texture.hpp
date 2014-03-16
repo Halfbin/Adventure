@@ -34,6 +34,7 @@ namespace Ad
   class Texture
   {
     uint glname;
+    int wide, high;
 
   public:
     typedef std::unique_ptr <Texture> Ptr;
@@ -44,6 +45,16 @@ namespace Ad
     int name () const
     {
       return glname;
+    }
+
+    int width () const
+    {
+      return wide;
+    }
+
+    int height () const
+    {
+      return high;
     }
 
     template <typename... Args>

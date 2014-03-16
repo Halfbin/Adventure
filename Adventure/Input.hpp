@@ -92,6 +92,11 @@ namespace Ad
     bool changed () const { return ch != 0; }
     bool locked  () const { return lk != 0; }
 
+    explicit operator bool () const
+    {
+      return down ();
+    }
+
   };
 
   namespace Events

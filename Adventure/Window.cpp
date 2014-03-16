@@ -205,8 +205,8 @@ namespace Ad
       WNDCLASSEXW window_class = { };
       window_class.cbSize        = sizeof (window_class);
       window_class.hInstance     = GetModuleHandleW (0);
-      window_class.hCursor       = LoadCursorW (window_class.hInstance, MAKEINTRESOURCE (IDC_ARROW));
-      window_class.hIcon         = LoadIconW   (window_class.hInstance, MAKEINTRESOURCE (IDI_APPLICATION));
+      window_class.hCursor       = LoadCursorW (window_class.hInstance, IDC_ARROW);
+      window_class.hIcon         = LoadIconW   (window_class.hInstance, IDI_APPLICATION);
       window_class.lpfnWndProc   = wnd_proc;
       window_class.lpszClassName = L"Ad::Window::Impl";
       RegisterClassExW (&window_class);
@@ -222,7 +222,7 @@ namespace Ad
         (LPCWSTR) w_title.c_str (),
         WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
         CW_USEDEFAULT, 0,
-        800, 600,
+        1280, 720,
         0,
         fake_menu,
         window_class.hInstance,
@@ -346,7 +346,7 @@ namespace Ad
     {
       PFNWGLSWAPINTERVALEXTPROC wglSwapInterval;
       link_wgl (wglSwapInterval, "wglSwapIntervalEXT");
-      wglSwapInterval (0);
+      wglSwapInterval (1);
     }
 
     glEnable (GL_MULTISAMPLE);

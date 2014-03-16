@@ -8,7 +8,7 @@
 
 namespace Ad
 {
-  class DefaultShader :
+  class ModelShader :
     public ShaderProgram
   {
     Shader vert, frag;
@@ -17,8 +17,8 @@ namespace Ad
     uint model_to_clip_loc;
 
   public:
-    DefaultShader ();
-    ~DefaultShader ();
+    ModelShader ();
+    ~ModelShader ();
 
     void use ()
     {
@@ -33,9 +33,7 @@ namespace Ad
     enum
     {
       attrib_vertpos = 0,
-      attrib_tcoords = 1,
-
-      tex_unit = 0
+      attrib_colour  = 1
     };
 
     uint model_to_clip () const

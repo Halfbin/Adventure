@@ -38,8 +38,7 @@ namespace Ad
       glformat = GL_RGBA;
     }
 
-    int width, height;
-    auto pixels = stbi_load_from_memory (raw.data (), raw.size (), &width, &height, &comp, comp);
+    auto pixels = stbi_load_from_memory (raw.data (), raw.size (), &wide, &high, &comp, comp);
 
     if (!pixels)
       throw std::runtime_error ("Error loading texture image");
@@ -70,7 +69,7 @@ namespace Ad
     glTexParameteri (target, GL_TEXTURE_WRAP_T,     glwrap);
     check_gl ("glTexParameteri failed");
 
-    glTexImage2D (target, 0, glformat, width, height, 0, glformat, GL_UNSIGNED_BYTE, pixels);
+    glTexImage2D (target, 0, glformat, wide, high, 0, glformat, GL_UNSIGNED_BYTE, pixels);
     check_gl ("glTexImage2D failed");
 
     glBindTexture (target, 0);

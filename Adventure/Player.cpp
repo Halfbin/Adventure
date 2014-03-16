@@ -8,47 +8,59 @@
 
 namespace Ad
 {
+  namespace
+  {
+    v2f round (v2f v)
+    {
+      return floor (v + v2f (0.5f, 0.5f));
+    }
+
+  }
+
   class PlayerImpl :
     public Player
   {
     Texture::Ptr tex_idle [4];
 
-    v2f position;
+    v2f position,
+        prev_position;
     v2i dir,
         facing;
 
     float speed;
-    Key up_key, down_key,left_key, right_key;
+    Key up_key, down_key, left_key, right_key;
 
-    void input (const Event* events, uint count, const KeyState* keys)
+    void input (const Event*, uint, const KeyState* keys)
     {
       using namespace Keys;
 
-      auto up_state      = keys [up_key   ].down (),
-           up_changed    = keys [up_key   ].changed (),
-           down_state    = keys [down_key ].down (),
-           down_changed  = keys [down_key ].changed (),
-           left_state    = keys [left_key ].down (),
-           left_changed  = keys [left_key ].changed (),
-           right_state   = keys [right_key].down (),
-           right_changed = keys [right_key].changed ();
+      auto up    = keys [up_key   ],
+           down  = keys [down_key ],
+           left  = keys [left_key ],
+           right = keys [right_key];
 
-      if (up_state || down_state)
+      if (up || down)
       {
-        if      (!down_state) dir.y = -1;
-        else if (!up_state)   dir.y =  1;
-        else if (up_changed || down_changed) dir.y = -dir.y;
+        if (!down)
+          dir.y = -1;
+        else if (!up)
+          dir.y =  1;
+        else if (up.changed () || down.changed ())
+          dir.y = -dir.y;
       }
       else
       {
         dir.y = 0;
       }
 
-      if (left_state || right_state)
+      if (left || right)
       {
-        if      (!right_state)  dir.x = -1;
-        else if (!left_state)   dir.x =  1;
-        else if (left_changed || right_changed) dir.x = -dir.x;
+        if (!right)
+          dir.x = -1;
+        else if (!left) 
+          dir.x =  1;
+        else if (left.changed () || right.changed ())
+          dir.x = -dir.x;
       }
       else
       {
@@ -61,6 +73,7 @@ namespace Ad
 
     void tick (float time, float step)
     {
+      prev_position = position;
       position += unit (v2f (dir)) * speed * step;
     }
 
@@ -79,7 +92,11 @@ namespace Ad
       else if (facing.x == -1) tex = tex_idle [2] -> name ();
       else if (facing.x ==  1) tex = tex_idle [3] -> name ();
 
-      frame.draw (tex, quad, 4, position, cxf (1, 0), v2f (1/128.f, 1/128.f));
+      auto pos = round (Rk::lerp (prev_position, position, frame.alpha));
+
+      frame.set_camera (pos);
+
+      frame.draw (tex, quad, 4, pos, cxf (1, 0), v2f (1/128.f, 1/128.f));
     }
 
   public:
@@ -96,11 +113,14 @@ namespace Ad
       left_key  = Keys::alpha_a;
       right_key = Keys::alpha_d;
 
-      tex_idle [0] = Texture::create ("Art/PlayerUp.png");
-      tex_idle [1] = Texture::create ("Art/PlayerDown.png");
-      tex_idle [2] = Texture::create ("Art/PlayerLeft.png");
-      tex_idle [3] = Texture::create ("Art/PlayerRight.png");
+      using namespace TexFlags;
+      tex_idle [0] = Texture::create ("Art/PlayerUp.png",    nearest);
+      tex_idle [1] = Texture::create ("Art/PlayerDown.png",  nearest);
+      tex_idle [2] = Texture::create ("Art/PlayerLeft.png",  nearest);
+      tex_idle [3] = Texture::create ("Art/PlayerRight.png", nearest);
     }
+
+    ~PlayerImpl () = default;
 
   };
 

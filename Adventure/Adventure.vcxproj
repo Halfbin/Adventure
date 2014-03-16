@@ -73,9 +73,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DefaultShader.cpp" />
+    <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Frontend.cpp" />
+    <ClCompile Include="Gusher.cpp" />
+    <ClCompile Include="Item.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="Geom.cpp" />
+    <ClCompile Include="ModelShader.cpp" />
     <ClCompile Include="Play.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Render.cpp" />
@@ -98,10 +103,15 @@
   <ItemGroup>
     <ClInclude Include="Buffer.hpp" />
     <ClInclude Include="DefaultShader.hpp" />
+    <ClInclude Include="Entity.hpp" />
     <ClInclude Include="Frame.hpp" />
     <ClInclude Include="GLError.hpp" />
+    <ClInclude Include="Gusher.hpp" />
     <ClInclude Include="Input.hpp" />
+    <ClInclude Include="Item.hpp" />
     <ClInclude Include="MinWin.hpp" />
+    <ClInclude Include="Geom.hpp" />
+    <ClInclude Include="ModelShader.hpp" />
     <ClInclude Include="Phase.hpp" />
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="Render.hpp" />
@@ -113,6 +123,8 @@
   <ItemGroup>
     <None Include="Default-Frag.glsl" />
     <None Include="Default-Vert.glsl" />
+    <None Include="Model-Frag.glsl" />
+    <None Include="Model-Vert.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
