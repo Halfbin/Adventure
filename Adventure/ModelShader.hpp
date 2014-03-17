@@ -14,7 +14,8 @@ namespace Ad
     Shader vert, frag;
     ShaderProgram prog;
 
-    uint model_to_clip_loc;
+    uint model_to_clip_loc,
+         model_to_world_loc;
 
   public:
     ModelShader ();
@@ -33,12 +34,18 @@ namespace Ad
     enum
     {
       attrib_vertpos = 0,
-      attrib_colour  = 1
+      attrib_colour  = 1,
+      attrib_normal  = 2
     };
 
     uint model_to_clip () const
     {
       return model_to_clip_loc;
+    }
+
+    uint model_to_world () const
+    {
+      return model_to_world_loc;
     }
 
   };

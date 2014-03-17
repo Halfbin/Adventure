@@ -110,8 +110,8 @@ namespace Ad
 
     m4f w2e = Rk::matrix_rows {
       v4f { 1,  0,  0, -c.x },
-      v4f { 0,  h, -h, -c.y },
-      v4f { 0, -h,  h,   0  },
+      v4f { 0,  h,  h, -c.y },
+      v4f { 0, -h, -h,   0  },
       v4f { 0,  0,  0,   1  }
     };
 
@@ -119,11 +119,14 @@ namespace Ad
 
     model_shader.use ();
 
-    glDisable (GL_CULL_FACE);
+    glEnable (GL_CULL_FACE);
     
     for (auto item : frame.model_items)
     {
       auto m2w = Rk::affine (item.trn, item.rot);
+
+      glUniformMatrix4fv (model_shader.model_to_world (), 1, true, reinterpret_cast <const float*> (&m2w));
+      check_gl ("glUniformMatrix4fv failed");
 
       for (int i = 0; i != 3; i++)
       for (int j = 0; j != 3; j++)

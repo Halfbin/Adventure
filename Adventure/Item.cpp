@@ -24,8 +24,11 @@ namespace Ad
 
     virtual void draw (Frame& frame)
     {
+      auto theta = Rk::lerp (t0, t1, frame.alpha);
+      auto axis = v3f (0.707, 0.707, 0);
+      auto ori = Rk::rotation (-0.7f, axis);
       auto pos = Rk::compose_vector { position, 1.f };
-      gush.draw (frame, v4f (1, 0, 0, 1), pos, identity, 16.0f);
+      gush.draw (frame, v4f (1, 0, 0, 1), pos, ori, 32.0f);
     }
 
   public:

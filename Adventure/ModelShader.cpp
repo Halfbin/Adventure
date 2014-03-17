@@ -17,11 +17,13 @@ namespace Ad
 
     prog.fix_attrib ("attrib_vertpos", attrib_vertpos);
     prog.fix_attrib ("attrib_colour",  attrib_colour);
+    prog.fix_attrib ("attrib_normal",  attrib_normal);
 
     prog.link ();
     prog.use ();
 
-    model_to_clip_loc = prog.link_uniform ("model_to_clip");
+    model_to_clip_loc  = prog.link_uniform ("model_to_clip");
+    model_to_world_loc = prog.link_uniform ("model_to_world");
   }
 
   ModelShader::~ModelShader () = default;
