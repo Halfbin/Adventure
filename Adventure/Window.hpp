@@ -6,7 +6,8 @@
 
 #include <Rk/string_ref.hpp>
 
-#include "Input.hpp"
+#include "InputSystem.hpp"
+#include "Frontend.hpp"
 
 #include <functional>
 
@@ -18,23 +19,19 @@ namespace Ad
     Impl* impl;
 
   public:
-    Window (Rk::cstring_ref title);
+    Window (Rk::cstring_ref title, InputSystem& in_sys);
     ~Window ();
 
     void on_close (std::function <void ()> func);
 
-    void pump ();
-
-    void update_keys (KeyState* keys);
-
-    const Event* events      () const;
-    uint         event_count () const;
+    InputContext pump (Frontend&);
 
     void show ();
-    void flip ();
 
     int width  () const;
     int height () const;
+
+    uptr handle () const;
 
   };
 

@@ -2,136 +2,35 @@
 // Adventure
 //
 
+#include "Frontend.hpp"
+
 #include <Rk/memory.hpp>
 #include <Rk/clamp.hpp>
 #include <Rk/types.hpp>
 
+#include "InputSystem.hpp"
+#include "GLContext.hpp"
 #include "Render.hpp"
 #include "Window.hpp"
+#include "Clock.hpp"
 #include "Phase.hpp"
 
 namespace Ad
 {
-  extern "C"
+  class FrontendImpl :
+    public Frontend
   {
-    __declspec(dllimport) i32 __stdcall QueryPerformanceFrequency (u64*);
-    __declspec(dllimport) i32 __stdcall QueryPerformanceCounter   (u64*);
-  }
-
-  namespace
-  {
-    class Clock
-    {
-      u64 prev_ticks,
-          ticks_per_second;
-
-    public:
-      Clock ()
-      {
-        QueryPerformanceFrequency (&ticks_per_second);
-      }
-
-      u64 ticks () const
-      {
-        u64 cur_ticks;
-        QueryPerformanceCounter (&cur_ticks);
-        return cur_ticks;
-      }
-
-      u64 frequency () const
-      {
-        return ticks_per_second;
-      }
-
-    };
-
-    class Syncer
-    {
-      Clock  clock;
-      u64    prev_ticks;
-      float  sim_time,
-             delta,
-             accum,
-             catchup,
-             wrap;
-      bool   ticking;
-
-    public:
-      Syncer (float tick_frequency, float max_catchup = 0.25f, float wrap_interval = 12000.0f) :
-        delta   (1 / tick_frequency),
-        ticking (false),
-        catchup (max_catchup),
-        wrap    (wrap_interval)
-      {
-        restart ();
-      }
-
-      void restart ()
-      {
-        sim_time = 0;
-        accum    = 0;
-
-        prev_ticks = clock.ticks ();
-      }
-
-      float interval () const
-      {
-        return delta;
-      }
-
-      float time () const
-      {
-        return sim_time;
-      }
-
-      float alpha () const
-      {
-        return accum / delta;
-      }
-
-      void update_clock ()
-      {
-        auto ticks = clock.ticks ();
-        auto delta_ticks = ticks - prev_ticks;
-        prev_ticks = ticks;
-
-        auto delta_real_time = float (delta_ticks) / float (clock.frequency ());
-
-        delta_real_time = Rk::clamp (delta_real_time, 0.0f, catchup);
-        accum += delta_real_time;
-
-        ticking = false;
-      }
-
-      bool need_tick () const
-      {
-        return accum >= delta;
-      }
-
-      void tick_done ()
-      {
-        accum    -= delta;
-        sim_time += delta;
-
-        // Wrap predictably
-        if (sim_time >= wrap)
-          sim_time -= wrap;
-      }
-
-    };
-
-  } // local
-
-  class Frontend
-  {
-    Window     win;
-    bool       running;
-    Phase::Ptr phase;
-    Syncer     syncer;
+    InputSystem in_sys;
+    Window      win;
+    GLContext   gl_ctx;
+    bool        running;
+    Phase::Ptr  phase;
+    Syncer      syncer;
 
   public:
-    Frontend () :
-      win    ("Adventure"),
+    FrontendImpl () :
+      win    ("Adventure", in_sys),
+      gl_ctx (win.handle ()),
       syncer (50)
     {
       win.on_close ([this] { running = false; });
@@ -145,16 +44,13 @@ namespace Ad
       win.show ();
       syncer.restart ();
       Renderer renderer;
-      KeyState keys [Keys::count];
 
       while (running)
       {
-        win.pump ();
-
         // Update input
-        win.update_keys (keys);
-        phase -> input (win.events (), win.event_count (), keys);
-        
+        auto in_ctx = win.pump (*this);
+        phase -> input (in_ctx);
+
         // Update clock
         syncer.update_clock ();
 
@@ -169,15 +65,25 @@ namespace Ad
         auto& frame = renderer.begin (win.width (), win.height (), syncer.alpha ());
         phase -> render (frame);
         renderer.end ();
-        win.flip ();
+        gl_ctx.flip ();
       }
+    }
+
+    void enter_mouse_look ()
+    {
+      in_sys.enter_mouse_look (win.handle ());
+    }
+
+    void leave_mouse_look ()
+    {
+      in_sys.leave_mouse_look (win.handle ());
     }
 
   };
 
   void true_main ()
   {
-    Frontend fe;
+    FrontendImpl fe;
     fe.run ();
   }
 

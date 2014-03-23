@@ -6,60 +6,42 @@
 
 #include "Texture.hpp"
 
+#include <Rk/clamp.hpp>
+
 namespace Ad
 {
-  namespace
-  {
-    v2f round (v2f v)
-    {
-      return floor (v + v2f (0.5f, 0.5f));
-    }
-
-  }
-
   class PlayerImpl :
     public Player
   {
-    Texture::Ptr tex_idle [4];
+    v3f position,
+        prev_position,
+        dir;
 
-    v2f position,
-        prev_position;
-    v2i dir,
-        facing;
+    vsf   orientation,
+          azimuth;
+    float elevation;
+    bool  crouching;
 
     float speed;
-    Key up_key, down_key, left_key, right_key;
+    Key up_key, left_key, down_key, right_key, crouch_key;
 
-    void input (const Event*, uint, const KeyState* keys)
+    void input (const InputContext& ctx)
     {
       using namespace Keys;
 
-      auto up    = keys [up_key   ],
-           down  = keys [down_key ],
-           left  = keys [left_key ],
-           right = keys [right_key];
+      auto up     = ctx.keys [up_key    ],
+           left   = ctx.keys [left_key  ],
+           down   = ctx.keys [down_key  ],
+           right  = ctx.keys [right_key ],
+           crouch = ctx.keys [crouch_key];
 
       if (up || down)
       {
         if (!down)
-          dir.y = -1;
-        else if (!up)
-          dir.y =  1;
-        else if (up.changed () || down.changed ())
-          dir.y = -dir.y;
-      }
-      else
-      {
-        dir.y = 0;
-      }
-
-      if (left || right)
-      {
-        if (!right)
-          dir.x = -1;
-        else if (!left) 
           dir.x =  1;
-        else if (left.changed () || right.changed ())
+        else if (!up)
+          dir.x = -1;
+        else if (up.changed || down.changed)
           dir.x = -dir.x;
       }
       else
@@ -67,57 +49,67 @@ namespace Ad
         dir.x = 0;
       }
 
-      if (dir.x || dir.y)
-        facing = dir;
+      if (left || right)
+      {
+        if (!right)
+          dir.y =  1;
+        else if (!left) 
+          dir.y = -1;
+        else if (left.changed || right.changed)
+          dir.y = -dir.y;
+      }
+      else
+      {
+        dir.y = 0;
+      }
+
+      crouching = crouch.down != 0;
+
+      azimuth = Rk::rotation (-0.001f * ctx.pointer.x, v3f (0, 0, 1))
+              * azimuth;
+
+      elevation = Rk::clamp (elevation + 0.001f * ctx.pointer.y, -1.55f, 1.55f);
+      auto elev_axis = Rk::conj (azimuth, v3f (0, 1, 0));
+
+      orientation = unit (Rk::rotation (elevation, elev_axis) * azimuth);
     }
 
     void tick (float time, float step)
     {
       prev_position = position;
-      position += unit (v2f (dir)) * speed * step;
+      auto velocity = speed * Rk::conj (azimuth, unit (dir));
+      position += velocity * step;
     }
 
     void draw (Frame& frame)
     {
-      float quad [] = {
-        -64, -64, 0, 0,
-         64, -64, 1, 0,
-         64,  64, 1, 1,
-        -64,  64, 0, 1
-      };
+      v3f eye_off { 0, 0, 1.7f };
+      if (crouching)
+        eye_off *= 0.5f;
 
-      uint tex;
-      if      (facing.y == -1) tex = tex_idle [0] -> name ();
-      else if (facing.y ==  1) tex = tex_idle [1] -> name ();
-      else if (facing.x == -1) tex = tex_idle [2] -> name ();
-      else if (facing.x ==  1) tex = tex_idle [3] -> name ();
-
-      auto pos = round (Rk::lerp (prev_position, position, frame.alpha));
-
-      frame.set_camera (pos);
-
-      frame.draw (tex, quad, 4, pos, cxf (1, 0), v2f (1/128.f, 1/128.f));
+      auto pos = Rk::lerp (prev_position, position, frame.alpha);
+      frame.set_camera (pos + eye_off, orientation);
     }
 
   public:
     PlayerImpl ()
     {
-      position = nil;
+      position = v3f (-15, 0, 0);
+      prev_position = position;
       dir = nil;
-      facing = v2i (0, 1);
 
-      speed = 250;
+      orientation = identity;
+      azimuth = identity;
+      elevation = 0.f;
 
-      up_key    = Keys::alpha_w;
-      down_key  = Keys::alpha_s;
-      left_key  = Keys::alpha_a;
-      right_key = Keys::alpha_d;
+      speed = 25;
 
-      using namespace TexFlags;
-      tex_idle [0] = Texture::create ("Art/PlayerUp.png",    nearest);
-      tex_idle [1] = Texture::create ("Art/PlayerDown.png",  nearest);
-      tex_idle [2] = Texture::create ("Art/PlayerLeft.png",  nearest);
-      tex_idle [3] = Texture::create ("Art/PlayerRight.png", nearest);
+      using namespace Keys;
+      up_key     = alpha_w;
+      left_key   = alpha_a;
+      down_key   = alpha_s;
+      right_key  = alpha_d;
+      crouch_key = lt_ctrl;
     }
 
     ~PlayerImpl () = default;

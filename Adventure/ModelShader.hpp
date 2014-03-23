@@ -8,8 +8,7 @@
 
 namespace Ad
 {
-  class ModelShader :
-    public ShaderProgram
+  class ModelShader
   {
     Shader vert, frag;
     ShaderProgram prog;
@@ -35,7 +34,10 @@ namespace Ad
     {
       attrib_vertpos = 0,
       attrib_colour  = 1,
-      attrib_normal  = 2
+      attrib_normal  = 2,
+      attrib_tcoords = 3,
+
+      tex_unit = 0
     };
 
     uint model_to_clip () const

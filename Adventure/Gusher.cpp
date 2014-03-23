@@ -112,7 +112,7 @@ namespace Ad
 
   void Gusher::draw (Frame& frame, v4f col, v3f pos, vsf ori, float scale)
   {
-    frame.draw (geom.name (), model ().idxs.size (), GL_UNSIGNED_BYTE, col, pos, ori, v3f { scale, scale, scale });
+    frame.draw (geom.name (), model ().idxs.size (), GL_UNSIGNED_BYTE, 0, col, pos, ori, v3f { scale, scale, scale });
   }
 
 }

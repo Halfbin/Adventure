@@ -15,7 +15,7 @@ namespace Ad
   public:
     typedef std::unique_ptr <Player> Ptr;
 
-    virtual void input  (const Event*, uint count, const KeyState*) = 0;
+    virtual void input (const InputContext& ctx) = 0;
 
   };
 

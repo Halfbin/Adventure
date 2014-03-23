@@ -4,32 +4,47 @@
 
 #include "Phase.hpp"
 
+#include "ModelShader.hpp"
 #include "Texture.hpp"
+#include "Buffer.hpp"
 #include "Player.hpp"
+#include "Geom.hpp"
 #include "Item.hpp"
 
 #include <Rk/transform.hpp>
 
-#include <cmath>
+#include <GL/glew.h>
 
 namespace Ad
 {
-  cxf rotation (float theta)
+  extern "C" __declspec (dllimport) void __stdcall OutputDebugStringA (const char*);
+
+  Buffer make_floor_data ()
   {
-    return cxf { std::cos (theta), std::sin (theta) };
+    float data [] = {
+      -20.f, -20.f, 0.f,  0,  0,
+       20.f, -20.f, 0.f, 10,  0,
+       20.f,  20.f, 0.f, 10, 10,
+      -20.f,  20.f, 0.f,  0, 10
+    };
+
+    return Buffer (sizeof (data), data);
   }
 
-  mat4f ortho (int iw, int ih, float dr)
+  Buffer make_floor_idxs ()
   {
-    auto w = float (iw),
-         h = float (ih);
+    u8 idxs [6] = { 0, 1, 2, 0, 2, 3 };
+    return Buffer (sizeof (idxs), idxs);
+  }
 
-    return Rk::matrix_rows {
-      v4f { 2 / w,    0,      0,     0 },
-      v4f {   0,   -2 / h,    0,     0 },
-      v4f {   0,      0,   -1 / dr,  0 },
-      v4f {   0,      0,      0,     1 }
+  Geom make_floor (const Buffer& data, const Buffer& idxs)
+  {
+    Attrib attribs [2] = {
+      { ModelShader::attrib_vertpos, data.name (), 3, GL_FLOAT, 20,  0 },
+      { ModelShader::attrib_tcoords, data.name (), 2, GL_FLOAT, 20, 12 }
     };
+
+    return Geom (attribs, 2, idxs.name ());
   }
 
   class PlayPhase :
@@ -37,8 +52,11 @@ namespace Ad
   {
     Player::Ptr player;
     std::vector <Entity::Ptr> entities;
-    
-    Texture::Ptr cobble;
+
+    Buffer floor_data,
+           floor_idxs;
+    Geom   floor;
+    Texture::Ptr floor_tex;
 
     float t0, t1;
 
@@ -47,9 +65,23 @@ namespace Ad
       entities.push_back (std::move (ent));
     }
 
-    void input (const Event* events, uint count, const KeyState* keys)
+    void input (const InputContext& ctx)
     {
-      player -> input (events, count, keys);
+      for (const auto& ev : ctx.events)
+      {
+        if (is_button_down (ev, Buttons::left))
+        {
+          OutputDebugStringA ("Buttons::left\n");
+          ctx.frontend.enter_mouse_look ();
+        }
+        else if (is_key_up (ev, Keys::escape))
+        {
+          OutputDebugStringA ("Keys::escape\n");
+          ctx.frontend.leave_mouse_look ();
+        }
+      }
+
+      player -> input (ctx);
     }
 
     void tick (float time, float step)
@@ -65,19 +97,9 @@ namespace Ad
 
     void render (Frame& frame)
     {
-      frame.clear_colour = vec4f (0.00f, 0.26f, 0.51f, 1.0f);
+      frame.clear_colour = { 0.00f, 0.26f, 0.51f, 1.00f };
 
-      auto eye_to_clip = ortho (frame.width, frame.height, 1000.0f);
-      frame.set_eye_to_clip (eye_to_clip);
-
-      float geom [] = {
-        -480, -320, -7.50, -4,
-         480, -320,  7.50, -4,
-         480,  320,  7.50,  4,
-        -480,  320, -7.50,  4
-      };
-
-      frame.draw (cobble -> name (), geom, 4, v2f (0, 0), cxf (1, 0), v2f (1/64.f, 1/64.f));
+      frame.draw (floor.name (), 6, GL_UNSIGNED_BYTE, floor_tex -> name (), {0,0,0,1}, nil, identity);
 
       for (auto&& ent : entities)
         ent -> draw (frame);
@@ -86,12 +108,18 @@ namespace Ad
     }
 
   public:
-    PlayPhase ()
+    PlayPhase () :
+      floor_data (make_floor_data ()),
+      floor_idxs (make_floor_idxs ()),
+      floor (make_floor (floor_data, floor_idxs))
     {
       player = create_player ();
-      add_entity (create_item ("Art/Globe1a.png", v2i (0, -0)));
+      add_entity (create_item ("Art/Globe1a.png", v2i (-5, -5)));
+      add_entity (create_item ("Art/Globe1a.png", v2i ( 5, -5)));
+      add_entity (create_item ("Art/Globe1a.png", v2i ( 5,  5)));
+      add_entity (create_item ("Art/Globe1a.png", v2i (-5,  5)));
 
-      cobble = Texture::create ("Art/Flags1a.png", TexFlags::nearest);
+      floor_tex = Texture::create ("Art/Flags1a.png", TexFlags::nearest);
     }
 
     ~PlayPhase () = default;

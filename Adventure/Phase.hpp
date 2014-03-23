@@ -16,7 +16,7 @@ namespace Ad
   public:
     typedef std::unique_ptr <Phase> Ptr;
 
-    virtual void input  (const Event*, uint count, const KeyState*) = 0;
+    virtual void input  (const InputContext&) = 0;
     virtual void tick   (float time, float step) = 0;
     virtual void render (Frame&) = 0;
 

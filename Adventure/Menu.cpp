@@ -19,7 +19,7 @@ namespace Ad
 
     float t0, t1;
 
-    void input (const Event*, uint, const KeyState*)
+    void input (const InputContext&)
     {
 
     }
