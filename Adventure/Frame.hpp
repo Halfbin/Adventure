@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "Geom.hpp"
+
 #include <Rk/matrix.hpp>
 #include <Rk/memory.hpp>
 #include <Rk/versor.hpp>
@@ -19,20 +21,12 @@ namespace Ad
   {
     friend class Renderer;
 
-  /*struct DrawItem
-    {
-      uint texture,
-           count;
-      v2f  translate;
-      cxf  rotate;
-      v2f  tc_scale;
-    };*/
-
     struct ModelItem
     {
       uint geom,
-           n_idxs,
            idx_type,
+           first_idx,
+           idx_count,
            tex;
       v4f  colour;
       v3f  trn;
@@ -43,7 +37,6 @@ namespace Ad
     v3f camera_pos;
     vsf camera_ori;
 
-  //std::vector <DrawItem>  draw_items;
     std::vector <ModelItem> model_items;
 
   /*u8* buf_ptr;
@@ -71,15 +64,18 @@ namespace Ad
     }*/
 
     void draw (
-      uint geom, 
-      uint n_idxs, uint idx_type,
+      const Geom& geom, 
+      uint first_idx,
+      uint idx_count,
       uint tex,
       v4f colour,
       v3f translate,
       vsf rotate = identity,
       v3f scale = { 1.f, 1.f, 1.f })
     {
-      model_items.push_back (ModelItem { geom, n_idxs, idx_type, tex, colour, translate, rotate, scale });
+      model_items.push_back (
+        ModelItem { geom.name (), geom.index_type (), first_idx, idx_count, tex, colour, translate, rotate, scale }
+      );
     }
 
   };

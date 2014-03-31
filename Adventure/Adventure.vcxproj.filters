@@ -52,6 +52,9 @@
     <ClCompile Include="GLContext.cpp">
       <Filter>Frontend\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Frontend\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ModelShader.hpp">
@@ -115,6 +118,9 @@
       <Filter>Frontend\Input</Filter>
     </ClInclude>
     <ClInclude Include="GLContext.hpp">
+      <Filter>Frontend\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.hpp">
       <Filter>Frontend\Graphics</Filter>
     </ClInclude>
   </ItemGroup>

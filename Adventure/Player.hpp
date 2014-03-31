@@ -12,6 +12,11 @@ namespace Ad
   class Player :
     public Entity
   {
+  protected:
+    Player (v3f pos, vsf ori) :
+      Entity (pos, ori)
+    { }
+
   public:
     typedef std::unique_ptr <Player> Ptr;
 

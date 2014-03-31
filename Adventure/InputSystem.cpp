@@ -83,6 +83,17 @@ namespace Ad
   {
     switch (msg)
     {
+      case WM_SIZE:
+        if (mouse_looking)
+        {
+          POINT area [2] { { 0, 0 }, { } };
+          ClientToScreen ((HWND) src, area);
+          area [1].x = area [0].x + LOWORD (lp);
+          area [1].y = area [0].y + HIWORD (lp);
+          ClipCursor ((const RECT*) area);
+        }
+      return 0;
+
       case WM_SETFOCUS:
         get_focus ((uptr) src);
       return 0;
@@ -248,8 +259,12 @@ namespace Ad
       throw Rk::win_error ("RegisterRawInputDevices failed");
 
     while (ShowCursor (false) >= 0);
-    mouse_looking = true;
+    
+    RECT area;
+    GetClientRect ((HWND) target, &area);
+    ClipCursor (&area);
 
+    mouse_looking = true;
   //OutputDebugStringA ("enter_mouse_look\n");
   }
 
@@ -262,8 +277,10 @@ namespace Ad
     RegisterRawInputDevices (&mouse, 1, sizeof (mouse));
 
     while (ShowCursor (true) < 0);
-    mouse_looking = false;
 
+    ClipCursor (nullptr);
+
+    mouse_looking = false;
   //OutputDebugStringA ("leave_mouse_look\n");
   }
 

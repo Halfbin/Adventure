@@ -43,7 +43,7 @@ namespace Ad
       case WM_SIZE:
         width  = LOWORD (lp);
         height = HIWORD (lp);
-      return 0;
+      break; // in_sys needs to know
 
       default:;
     }
@@ -100,7 +100,7 @@ namespace Ad
       (LPCWSTR) w_title.c_str (),
       WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
       CW_USEDEFAULT, 0,
-      1680, 1050,
+      1280, 720,
       0,
       fake_menu,
       window_class.hInstance,

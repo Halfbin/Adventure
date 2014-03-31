@@ -8,6 +8,8 @@
 
 #include <Rk/types.hpp>
 
+#include <memory>
+
 #include <GL/glew.h>
 
 namespace Ad
@@ -17,6 +19,8 @@ namespace Ad
     uint glname;
 
   public:
+    typedef std::shared_ptr <Buffer> Ptr;
+
     Buffer (size_t size, const void* data = nullptr)
     {
       glGenBuffers (1, &glname);
@@ -33,12 +37,25 @@ namespace Ad
 
     ~Buffer ()
     {
-      glDeleteBuffers (1, &glname);
+      if (glname != 0)
+        glDeleteBuffers (1, &glname);
     }
 
     uint name () const
     {
       return glname;
+    }
+
+    uint release ()
+    {
+      auto temp = glname;
+      glname = 0;
+      return temp;
+    }
+
+    static Ptr create (size_t size, const void* data = nullptr)
+    {
+      return std::make_shared <Buffer> (size, data);
     }
 
   };

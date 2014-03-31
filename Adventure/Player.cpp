@@ -13,27 +13,41 @@ namespace Ad
   class PlayerImpl :
     public Player
   {
-    v3f position,
-        prev_position,
-        dir;
+    v3f prev_pos,
+        dir,
+        vel;
 
-    vsf   orientation,
-          azimuth;
+    vsf   azimuth;
     float elevation;
-    bool  crouching;
+    bool  crouching,
+          on_ground;
 
-    float speed;
-    Key up_key, left_key, down_key, right_key, crouch_key;
+    v3f speed;
+    Key up_key, left_key, down_key, right_key, crouch_key, jump_key;
 
     void input (const InputContext& ctx)
     {
       using namespace Keys;
 
+      // Crouching
+      auto crouch = ctx.keys [crouch_key];
+      crouching = crouch.down != 0;
+
+      // Looking
+      azimuth = Rk::rotation (-0.001f * ctx.pointer.x, v3f (0, 0, 1))
+              * azimuth;
+
+      elevation = Rk::clamp (elevation + 0.001f * ctx.pointer.y, -1.55f, 1.55f);
+      auto elev_axis = Rk::conj (azimuth, v3f (0, 1, 0));
+
+      ori = unit (Rk::rotation (elevation, elev_axis) * azimuth);
+
+      // Walking
       auto up     = ctx.keys [up_key    ],
            left   = ctx.keys [left_key  ],
            down   = ctx.keys [down_key  ],
            right  = ctx.keys [right_key ],
-           crouch = ctx.keys [crouch_key];
+           jump   = ctx.keys [jump_key  ];
 
       if (up || down)
       {
@@ -63,22 +77,28 @@ namespace Ad
         dir.y = 0;
       }
 
-      crouching = crouch.down != 0;
-
-      azimuth = Rk::rotation (-0.001f * ctx.pointer.x, v3f (0, 0, 1))
-              * azimuth;
-
-      elevation = Rk::clamp (elevation + 0.001f * ctx.pointer.y, -1.55f, 1.55f);
-      auto elev_axis = Rk::conj (azimuth, v3f (0, 1, 0));
-
-      orientation = unit (Rk::rotation (elevation, elev_axis) * azimuth);
+      if (jump)
+        dir.z = 1;
     }
 
-    void tick (float time, float step)
+    void advance (float time, float step)
     {
-      prev_position = position;
-      auto velocity = speed * Rk::conj (azimuth, unit (dir));
-      position += velocity * step;
+      prev_pos = pos;
+
+      if (on_ground)
+      {
+        vel = speed * Rk::conj (azimuth, unit (dir));
+        if (vel.z != 0)
+          on_ground = false;
+      }
+      else
+      {
+        auto gravity = v3f {0,0,-1} * 20;
+        auto drag = v3f {0,0,1} * pow (Rk::abs (vel), 2.0f) * 0.01;
+        vel += (gravity + drag) * step;
+      }
+
+      pos += vel * step;
     }
 
     void draw (Frame& frame)
@@ -87,22 +107,36 @@ namespace Ad
       if (crouching)
         eye_off *= 0.5f;
 
-      auto pos = Rk::lerp (prev_position, position, frame.alpha);
-      frame.set_camera (pos + eye_off, orientation);
+      auto draw_pos = Rk::lerp (prev_pos, pos, frame.alpha);
+      frame.set_camera (pos + eye_off, ori);
+    }
+
+    void collide (v3f normal, float pdist)
+    {
+      pos += normal * pdist;
+      if (normal.z * normal.z > normal.x * normal.x + normal.y * normal.y)
+        on_ground = true;
+      dir.z = 0;
     }
 
   public:
-    PlayerImpl ()
+    PlayerImpl () :
+      Player ({-15,0,5}, identity)
     {
-      position = v3f (-15, 0, 0);
-      prev_position = position;
-      dir = nil;
+      bbox_mins = {-0.4f,-0.4f, 0.0f};
+      bbox_maxs = { 0.4f, 0.4f, 1.8f};
 
-      orientation = identity;
+      prev_pos = pos;
+      dir = nil;
+      vel = nil;
+
       azimuth = identity;
       elevation = 0.f;
 
-      speed = 25;
+      crouching = false;
+      on_ground = false;
+
+      speed = {8,8,12};
 
       using namespace Keys;
       up_key     = alpha_w;
@@ -110,6 +144,7 @@ namespace Ad
       down_key   = alpha_s;
       right_key  = alpha_d;
       crouch_key = lt_ctrl;
+      jump_key   = spacebar;
     }
 
     ~PlayerImpl () = default;

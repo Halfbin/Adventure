@@ -43,64 +43,9 @@ namespace Ad
       check_gl ("glEnableVertexAttribArray failed");*/
     }
 
-  //void render_2d     (const Frame& frame);
     void render_models (const Frame& frame);
 
   };
-
-/*void Renderer::Impl::render_2d (const Frame& frame)
-  {
-  auto c = frame.camera;
-
-    m4f w2e = Rk::matrix_rows {
-      v4f { 1, 0, 0, -c.x },
-      v4f { 0, 1, 0, -c.y },
-      v4f { 0, 0, 1,   0  },
-      v4f { 0, 0, 0,   1  }
-    };
-
-    auto w2c = frame.eye_to_clip * w2e;
-
-    shader.use ();
-
-    glActiveTexture (GL_TEXTURE0 + shader.tex_unit);
-
-    glDisable (GL_CULL_FACE);
-
-    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable (GL_BLEND);
-    
-    int first = 0;
-
-    for (auto item : frame.draw_items)
-    {
-      auto rot = item.rotate;
-      auto trn = item.translate;
-
-      auto c = item.rotate.real ();
-      auto s = item.rotate.imag ();
-
-      m4f m2w = Rk::matrix_rows {
-        v4f { c, -s, 0, trn.x },
-        v4f { s,  c, 0, trn.y },
-        v4f { 0,  0, 1,   0   },
-        v4f { 0,  0, 0,   1   }
-      };
-
-      auto m2c = w2c * m2w;
-
-      glUniformMatrix4fv (shader.model_to_clip (), 1, true, reinterpret_cast <const float*> (&m2c));
-      check_gl ("glUniformMatrix4fv failed");
-
-      glBindTexture (GL_TEXTURE_2D, item.texture);
-      check_gl ("glBindTexture failed");
-
-      glDrawArrays (GL_TRIANGLE_FAN, first, item.count);
-      check_gl ("glDrawArrays failed");
-
-      first += item.count;
-    }
-  }*/
 
   void Renderer::Impl::render_models (const Frame& frame)
   {
@@ -144,7 +89,7 @@ namespace Ad
       glBindVertexArray (item.geom);
       check_gl ("glBindVertexArray failed");
 
-      glDrawElements (GL_TRIANGLES, item.n_idxs, item.idx_type, nullptr);
+      glDrawElementsBaseVertex (GL_TRIANGLES, item.idx_count, item.idx_type, nullptr, item.first_idx);
       check_gl ("glDrawElements failed");
     }
   }
@@ -157,7 +102,6 @@ namespace Ad
     frame.height = height;
     frame.alpha  = alpha;
 
-  //frame.draw_items.clear ();
     frame.model_items.clear ();
 
   /*glBindVertexArray (0);
@@ -186,7 +130,6 @@ namespace Ad
     glClearColor (cc.x, cc.y, cc.z, cc.w);
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  //impl -> render_2d     (frame);
     impl -> render_models (frame);
   }
 

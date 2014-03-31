@@ -5,6 +5,11 @@
 #include "Gusher.hpp"
 
 #include "ModelShader.hpp"
+#include "Buffer.hpp"
+
+#include <Rk/vector.hpp>
+
+#include <vector>
 
 namespace Ad
 {
@@ -14,7 +19,7 @@ namespace Ad
   {
     const float s = 0.8660254037f; // sin 60 = sqrt (3) / 2
     const float c = 0.5f;          // cos 60 =    1     / 2
-    
+
     const v3f gusher_verts [14] = {
       { 0, 0, -0.75f }, // 0 bottom
       { 0, 0,  0.75f }, // 1 top
@@ -92,27 +97,27 @@ namespace Ad
       return data;
     }
 
-    const ModelData& model ()
-    {
-      static ModelData data = add_normals (gusher_verts, gusher_tris, 72);
-      return data;
-    }
-
   } // local
 
-  Gusher::Gusher () :
-    data (model ().verts.size () * sizeof (Vert), model ().verts.data ()),
-    idxs (model ().idxs.size  () * sizeof (u8),   model ().idxs.data  ()),
-    geom (
-      { { ModelShader::attrib_vertpos, data.name (), 3, GL_FLOAT, 24, 0 },
-        { ModelShader::attrib_normal,  data.name (), 3, GL_FLOAT, 24, 12 }
-      },
-      idxs.name ())
-  { }
-
-  void Gusher::draw (Frame& frame, v4f col, v3f pos, vsf ori, float scale)
+  Geom make_gusher ()
   {
-    frame.draw (geom.name (), model ().idxs.size (), GL_UNSIGNED_BYTE, 0, col, pos, ori, v3f { scale, scale, scale });
+    auto mod = add_normals (gusher_verts, gusher_tris, 72);
+
+    Buffer data (mod.verts.size () * sizeof (Vert), mod.verts.data ());
+    Buffer idxs (mod.idxs.size  () * sizeof (u8),   mod.idxs.data  ());
+
+    auto geom = Geom (
+      { { ModelShader::attrib_vertpos, data.name (), 3, GL_FLOAT, 24,  0 },
+        { ModelShader::attrib_normal,  data.name (), 3, GL_FLOAT, 24, 12 } },
+      idxs.name (),
+      mod.idxs.size (),
+      GL_UNSIGNED_BYTE
+    );
+
+    data.release ();
+    idxs.release ();
+
+    return geom;
   }
 
 }

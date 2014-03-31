@@ -8,7 +8,9 @@
 
 namespace Ad
 {
-  Geom::Geom (const Attrib* attribs, uint count, uint index_buffer)
+  Geom::Geom (const Attrib* attribs, uint count, uint idx_buf, uint new_idx_count, uint new_idx_type) :
+    idx_type  (new_idx_type),
+    idx_count (new_idx_count)
   {
     glGenVertexArrays (1, &vao_name);
     glBindVertexArray (vao_name);
@@ -26,13 +28,16 @@ namespace Ad
       glEnableVertexAttribArray (attr -> index);
     }
 
-    if (index_buffer)
-      glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, index_buffer);
+    if (idx_buf)
+      glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, idx_buf);
+
+    glBindVertexArray (0);
   }
 
-  Geom::~Geom ()
+  void Geom::clear ()
   {
-    glDeleteVertexArrays (1, &vao_name);
+    if (vao_name != 0)
+      glDeleteVertexArrays (1, &vao_name);
   }
 
 }
