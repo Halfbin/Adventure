@@ -15,6 +15,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rk-TextIO", "Rk-TextIO\Rk-T
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Ad-Maya", "Ad-Maya\Ad-Maya.vcxproj", "{FB2DD443-F7F5-481D-8AA8-0900ED6DDB4D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Ad-worldc", "Ad-worldc\Ad-worldc.vcxproj", "{DD47EF4D-4023-4016-AD86-314897FDE987}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -71,6 +73,12 @@ Global
 		{FB2DD443-F7F5-481D-8AA8-0900ED6DDB4D}.Release|Win32.Build.0 = Release|Win32
 		{FB2DD443-F7F5-481D-8AA8-0900ED6DDB4D}.Release|x64.ActiveCfg = Release|x64
 		{FB2DD443-F7F5-481D-8AA8-0900ED6DDB4D}.Release|x64.Build.0 = Release|x64
+		{DD47EF4D-4023-4016-AD86-314897FDE987}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DD47EF4D-4023-4016-AD86-314897FDE987}.Debug|Win32.Build.0 = Debug|Win32
+		{DD47EF4D-4023-4016-AD86-314897FDE987}.Debug|x64.ActiveCfg = Debug|Win32
+		{DD47EF4D-4023-4016-AD86-314897FDE987}.Release|Win32.ActiveCfg = Release|Win32
+		{DD47EF4D-4023-4016-AD86-314897FDE987}.Release|Win32.Build.0 = Release|Win32
+		{DD47EF4D-4023-4016-AD86-314897FDE987}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
