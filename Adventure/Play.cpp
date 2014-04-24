@@ -19,44 +19,6 @@ namespace Ad
 {
   extern "C" __declspec (dllimport) void __stdcall OutputDebugStringA (const char*);
 
-  Buffer make_floor_data ()
-  {
-    float data [] = {
-      -20.f, -20.f, 0.f,   0,  0, // 0
-       20.f, -20.f, 0.f,  10,  0, // 1
-       20.f,  20.f, 0.f,  10, 10, // 2
-      -20.f,  20.f, 0.f,   0, 10, // 3
-       40.f, -20.f, 15.f, 16.25f,  0, // 4
-       40.f,  20.f, 15.f, 16.25f, 10, // 5
-    };
-
-    return Buffer (sizeof (data), data);
-  }
-
-  Buffer make_floor_idxs ()
-  {
-    u8 idxs [] = { 0, 1, 2, 0, 2, 3, 1, 4, 5, 1, 5, 2 };
-    return Buffer (sizeof (idxs), idxs);
-  }
-
-  Geom make_floor ()
-  {
-    auto data = make_floor_data ();
-    auto idxs = make_floor_idxs ();
-
-    Attrib attribs [2] = {
-      { ModelShader::attrib_vertpos, data.name (), 3, GL_FLOAT, 20,  0 },
-      { ModelShader::attrib_tcoords, data.name (), 2, GL_FLOAT, 20, 12 }
-    };
-
-    auto geom = Geom (attribs, 2, idxs.name (), 12, GL_UNSIGNED_BYTE);
-
-    data.release ();
-    idxs.release ();
-
-    return geom;
-  }
-
   class CollisionState
   {
   public:
@@ -145,9 +107,6 @@ namespace Ad
     std::vector <Entity::Ptr> entities;
     CollisionState collide;
 
-    Geom         floor;
-    Texture::Ptr floor_tex;
-
     float t0, t1;
 
     void add_entity (Entity::Ptr ent)
@@ -178,21 +137,19 @@ namespace Ad
       for (auto&& ent : entities)
       {
         ent -> advance (time, step);
-        collide.add_ent (ent.get ());
+      //collide.add_ent (ent.get ());
       }
 
       player -> advance (time, step);
-      collide.add_ent (player.get ());
+    //collide.add_ent (player.get ());
 
-      for (auto ev : collide.find_collisions ())
-        ev.ent -> collide (ev.normal, ev.pdist);
+    /*for (auto ev : collide.find_collisions ())
+        ev.ent -> collide (ev.normal, ev.pdist);*/
     }
 
     void render (Frame& frame)
     {
       frame.clear_colour = { 0.00f, 0.26f, 0.51f, 1.00f };
-
-      frame.draw (floor, 0, floor.index_count (), floor_tex -> name (), {0,0,0,1}, nil, identity);
 
       for (auto&& ent : entities)
         ent -> draw (frame);
@@ -201,8 +158,7 @@ namespace Ad
     }
 
   public:
-    PlayPhase () :
-      floor (make_floor ())
+    PlayPhase ()
     {
       player = create_player ();
       add_entity (create_item ("Art/Globe1a.png", {-5,-5, 0}));
@@ -210,15 +166,13 @@ namespace Ad
       add_entity (create_item ("Art/Globe1a.png", { 5, 5, 0}));
       add_entity (create_item ("Art/Globe1a.png", {-5, 5, 0}));
 
-      floor_tex = Texture::create ("Art/Flags1a.png", TexFlags::nearest);
-
-      collide.add_plane ({ 0, 0, 1},   0);
+    /*collide.add_plane ({ 0, 0, 1},   0);
       collide.add_plane ({ 1, 0, 0}, -20);
       collide.add_plane ({-1, 0, 0}, -40);
       collide.add_plane ({ 0, 1, 0}, -20);
       collide.add_plane ({ 0,-1, 0}, -20);
 
-      collide.add_plane ({-0.6f, 0, 0.8f}, -12);
+      collide.add_plane ({-0.6f, 0, 0.8f}, -12);*/
     }
 
     ~PlayPhase () = default;

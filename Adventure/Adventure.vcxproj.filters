@@ -55,6 +55,9 @@
     <ClCompile Include="Model.cpp">
       <Filter>Frontend\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="World.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ModelShader.hpp">
