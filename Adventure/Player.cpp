@@ -13,49 +13,55 @@ namespace Ad
   class PlayerImpl :
     public Player
   {
-    v3f prev_pos,
-        dir,
-        vel;
-
-    vsf   azimuth;
-    float elevation;
-    bool  crouching,
-          on_ground;
-
+    v3f prev_pos;
     v3f speed;
-    Key up_key, left_key, down_key, right_key, crouch_key, jump_key;
+    v3f dir;
+    float rolling;
+    Key forward_key, left_key, back_key, right_key, drop_key, rise_key, cw_key, ccw_key;
 
     void input (const InputContext& ctx)
     {
       using namespace Keys;
 
-      // Crouching
-      auto crouch = ctx.keys [crouch_key];
-      crouching = crouch.down != 0;
-
       // Looking
-      azimuth = Rk::rotation (-0.001f * ctx.pointer.x, v3f (0, 0, 1))
-              * azimuth;
+      auto cw  = ctx.keys [cw_key ],
+           ccw = ctx.keys [ccw_key];
 
-      elevation = Rk::clamp (elevation + 0.001f * ctx.pointer.y, -1.55f, 1.55f);
-      auto elev_axis = Rk::conj (azimuth, v3f (0, 1, 0));
+      if (cw || ccw)
+      {
+        if (!ccw)
+          rolling =  1;
+        else if (!cw) 
+          rolling = -1;
+        else if (cw.changed || ccw.changed)
+          rolling = -rolling;
+      }
+      else
+      {
+        rolling = 0;
+      }
 
-      ori = unit (Rk::rotation (elevation, elev_axis) * azimuth);
+      vsf yaw   = Rk::rotation (-0.001f * ctx.pointer.x, v3f (0, 0, 1));
+      vsf pitch = Rk::rotation ( 0.001f * ctx.pointer.y, v3f (0, 1, 0));
+      vsf roll  = Rk::rotation ( 0.020f * rolling,       v3f (1, 0, 0));
+
+      ori = unit (ori * pitch * yaw * roll);
 
       // Walking
-      auto up     = ctx.keys [up_key    ],
-           left   = ctx.keys [left_key  ],
-           down   = ctx.keys [down_key  ],
-           right  = ctx.keys [right_key ],
-           jump   = ctx.keys [jump_key  ];
+      auto forward = ctx.keys [forward_key],
+           left    = ctx.keys [left_key   ],
+           back    = ctx.keys [back_key   ],
+           right   = ctx.keys [right_key  ],
+           drop    = ctx.keys [drop_key   ],
+           rise    = ctx.keys [rise_key   ];
 
-      if (up || down)
+      if (forward || back)
       {
-        if (!down)
+        if (!back)
           dir.x =  1;
-        else if (!up)
+        else if (!forward)
           dir.x = -1;
-        else if (up.changed || down.changed)
+        else if (forward.changed || back.changed)
           dir.x = -dir.x;
       }
       else
@@ -77,36 +83,31 @@ namespace Ad
         dir.y = 0;
       }
 
-      if (jump)
-        dir.z = 1;
+      if (rise || drop)
+      {
+        if (!drop)
+          dir.z =  1;
+        else if (!rise) 
+          dir.z = -1;
+        else if (rise.changed || drop.changed)
+          dir.z = -dir.z;
+      }
+      else
+      {
+        dir.z = 0;
+      }
     }
 
     void advance (float time, float step)
     {
       prev_pos = pos;
-
-      if (on_ground)
-      {
-        vel = speed * Rk::conj (azimuth, unit (dir));
-        if (vel.z != 0)
-          on_ground = false;
-      }
-      else
-      {
-        auto gravity = v3f {0,0,-1} * 20;
-        auto drag = v3f {0,0,1} * pow (Rk::abs (vel), 2.0f) * 0.01;
-        vel += (gravity + drag) * step;
-      }
-
+      auto vel = Rk::conj (ori, speed * unit (dir));
       pos += vel * step;
     }
 
     void draw (Frame& frame)
     {
-      v3f eye_off { 0, 0, 1.7f };
-      if (crouching)
-        eye_off *= 0.5f;
-
+      v3f eye_off { 0, 0, 0 };
       auto draw_pos = Rk::lerp (prev_pos, pos, frame.alpha);
       frame.set_camera (pos + eye_off, ori);
     }
@@ -114,9 +115,8 @@ namespace Ad
     void collide (v3f normal, float pdist)
     {
       pos += normal * pdist;
-      if (normal.z * normal.z > normal.x * normal.x + normal.y * normal.y)
-        on_ground = true;
-      dir.z = 0;
+      if (dot (dir, normal) < 0)
+        dir = nil;
     }
 
   public:
@@ -128,23 +128,19 @@ namespace Ad
 
       prev_pos = pos;
       dir = nil;
-      vel = nil;
+      rolling = 0.0f;
 
-      azimuth = identity;
-      elevation = 0.f;
-
-      crouching = false;
-      on_ground = false;
-
-      speed = {8,8,12};
+      speed = {10,4,4};
 
       using namespace Keys;
-      up_key     = alpha_w;
-      left_key   = alpha_a;
-      down_key   = alpha_s;
-      right_key  = alpha_d;
-      crouch_key = lt_ctrl;
-      jump_key   = spacebar;
+      forward_key = alpha_w;
+      left_key    = alpha_a;
+      back_key    = alpha_s;
+      right_key   = alpha_d;
+      drop_key    = lt_ctrl;
+      rise_key    = spacebar;
+      cw_key      = alpha_e;
+      ccw_key     = alpha_q;
     }
 
     ~PlayerImpl () = default;
