@@ -100,7 +100,7 @@ namespace Ad
       (LPCWSTR) w_title.c_str (),
       WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
       CW_USEDEFAULT, 0,
-      1280, 720,
+      1600, 900,
       0,
       fake_menu,
       window_class.hInstance,
