@@ -5,6 +5,7 @@
 #include "Phase.hpp"
 
 #include "ModelShader.hpp"
+#include "Starfield.hpp"
 #include "Texture.hpp"
 #include "Buffer.hpp"
 #include "Player.hpp"
@@ -19,7 +20,7 @@ namespace Ad
 {
   extern "C" __declspec (dllimport) void __stdcall OutputDebugStringA (const char*);
 
-  Buffer make_floor_data ()
+/*Buffer make_floor_data ()
   {
     float data [] = {
       -20.f, -20.f, 0.f,   0,  0, // 0
@@ -55,7 +56,7 @@ namespace Ad
     idxs.release ();
 
     return geom;
-  }
+  }*/
 
   class CollisionState
   {
@@ -145,8 +146,10 @@ namespace Ad
     std::vector <Entity::Ptr> entities;
     CollisionState collide;
 
-    Geom         floor;
-    Texture::Ptr floor_tex;
+  /*Geom         floor;
+    Texture::Ptr floor_tex;*/
+
+    Geom starfield;
 
     float t0, t1;
 
@@ -190,9 +193,10 @@ namespace Ad
 
     void render (Frame& frame)
     {
-      frame.clear_colour = { 0.00f, 0.26f, 0.51f, 1.00f };
+      frame.clear_colour = { 0.00f, 0.01f, 0.025f, 1.00f };
+      frame.set_starfield (starfield);
 
-      frame.draw (floor, 0, floor.index_count (), floor_tex -> name (), {0,0,0,1}, nil, identity);
+      // frame.draw (floor, 0, floor.index_count (), floor_tex -> name (), {0,0,0,1}, nil, identity);
 
       for (auto&& ent : entities)
         ent -> draw (frame);
@@ -201,11 +205,13 @@ namespace Ad
     }
 
   public:
-    PlayPhase () :
-      floor (make_floor ())
+    PlayPhase ()/* :
+      floor (make_floor ())*/
     {
+      starfield = make_starfield (20000);
+
       player = create_player ();
-      add_entity (create_item ("Art/Globe1a.png", {-5,-5, 0}));
+    /*add_entity (create_item ("Art/Globe1a.png", {-5,-5, 0}));
       add_entity (create_item ("Art/Globe1a.png", { 5,-5, 0}));
       add_entity (create_item ("Art/Globe1a.png", { 5, 5, 0}));
       add_entity (create_item ("Art/Globe1a.png", {-5, 5, 0}));
@@ -218,7 +224,7 @@ namespace Ad
       collide.add_plane ({ 0, 1, 0}, -20);
       collide.add_plane ({ 0,-1, 0}, -20);
 
-      collide.add_plane ({-0.6f, 0, 0.8f}, -12);
+      collide.add_plane ({-0.6f, 0, 0.8f}, -12);*/
     }
 
     ~PlayPhase () = default;

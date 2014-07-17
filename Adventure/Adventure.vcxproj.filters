@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="ModelShader.cpp">
-      <Filter>Frontend\Graphics\Shaders</Filter>
-    </ClCompile>
     <ClCompile Include="Gusher.cpp">
       <Filter>Game</Filter>
     </ClCompile>
@@ -55,11 +52,17 @@
     <ClCompile Include="Model.cpp">
       <Filter>Frontend\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="Starfield.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelShader.cpp">
+      <Filter>Frontend\Graphics\Shaders\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="StarfieldShader.cpp">
+      <Filter>Frontend\Graphics\Shaders\Starfield</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ModelShader.hpp">
-      <Filter>Frontend\Graphics\Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="Gusher.hpp">
       <Filter>Game</Filter>
     </ClInclude>
@@ -123,13 +126,28 @@
     <ClInclude Include="Model.hpp">
       <Filter>Frontend\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="ModelShader.hpp">
+      <Filter>Frontend\Graphics\Shaders\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="StarfieldShader.hpp">
+      <Filter>Frontend\Graphics\Shaders\Starfield</Filter>
+    </ClInclude>
+    <ClInclude Include="Starfield.hpp">
+      <Filter>Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Model-Vert.glsl">
-      <Filter>Frontend\Graphics\Shaders</Filter>
-    </None>
     <None Include="Model-Frag.glsl">
-      <Filter>Frontend\Graphics\Shaders</Filter>
+      <Filter>Frontend\Graphics\Shaders\Model</Filter>
+    </None>
+    <None Include="Model-Vert.glsl">
+      <Filter>Frontend\Graphics\Shaders\Model</Filter>
+    </None>
+    <None Include="Starfield-Frag.glsl">
+      <Filter>Frontend\Graphics\Shaders\Starfield</Filter>
+    </None>
+    <None Include="Starfield-Vert.glsl">
+      <Filter>Frontend\Graphics\Shaders\Starfield</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -147,6 +165,12 @@
     </Filter>
     <Filter Include="Frontend\Graphics\Shaders">
       <UniqueIdentifier>{e81e6e03-96e9-4866-81a7-081dc7835bfb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Frontend\Graphics\Shaders\Model">
+      <UniqueIdentifier>{e6af1ad0-041a-4ffe-872e-c8ff3a3301d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Frontend\Graphics\Shaders\Starfield">
+      <UniqueIdentifier>{0c4c4704-13fd-4b01-a032-99453b295a30}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

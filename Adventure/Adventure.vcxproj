@@ -146,6 +146,8 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Starfield.cpp" />
+    <ClCompile Include="StarfieldShader.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Window.cpp" />
@@ -181,6 +183,8 @@
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="Render.hpp" />
     <ClInclude Include="Shader.hpp" />
+    <ClInclude Include="Starfield.hpp" />
+    <ClInclude Include="StarfieldShader.hpp" />
     <ClInclude Include="stb_image.hpp" />
     <ClInclude Include="Texture.hpp" />
     <ClInclude Include="Window.hpp" />
@@ -188,6 +192,8 @@
   <ItemGroup>
     <None Include="Model-Frag.glsl" />
     <None Include="Model-Vert.glsl" />
+    <None Include="Starfield-Frag.glsl" />
+    <None Include="Starfield-Vert.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

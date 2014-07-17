@@ -7,6 +7,7 @@
 #include <Rk/transform.hpp>
 
 #include "ModelShader.hpp"
+#include "StarfieldShader.hpp"
 
 #include "GLError.hpp"
 #include "Buffer.hpp"
@@ -19,10 +20,11 @@ namespace Ad
 
   struct Renderer::Impl
   {
-  //Buffer        vbo;
-    Frame         frame;
-  //DefaultShader shader;
-    ModelShader   model_shader;
+  //Buffer          vbo;
+    Frame           frame;
+  //DefaultShader   shader;
+    ModelShader     model_shader;
+    StarfieldShader starfield_shader;
 
     Impl ()/* :
       vbo (vbo_size)*/
@@ -43,7 +45,8 @@ namespace Ad
       check_gl ("glEnableVertexAttribArray failed");*/
     }
 
-    void render_models (const Frame& frame);
+    void render_models    (const Frame& frame);
+    void render_starfield (const Frame& frame);
 
   };
 
@@ -94,6 +97,31 @@ namespace Ad
     }
   }
 
+  void Renderer::Impl::render_starfield (const Frame& frame)
+  {
+    m4f e2c = Rk::eye_to_clip (75.0f, float (frame.width) / float (frame.height), 0.1f, 1000.0f);
+    m4f s2e = Rk::world_to_eye (v3f {0,0,0}, frame.camera_ori);
+    auto s2c = e2c * s2e;
+
+    starfield_shader.use ();
+
+    glUniform1f (starfield_shader.twinkle (), 1.0f);
+
+    glUniformMatrix4fv (starfield_shader.sky_to_clip (), 1, true, reinterpret_cast <const float*> (&s2c));
+
+    glEnable (GL_PROGRAM_POINT_SIZE);
+    //glEnable (GL_POINT_SMOOTH);
+    glDisable (GL_CULL_FACE);
+    glEnable  (GL_DEPTH_TEST);
+    glDisable (GL_BLEND);
+
+    glBindVertexArray (frame.starfield_geom);
+    check_gl ("glBindVertexArray failed");
+
+    glDrawArrays (GL_POINTS, 0, frame.starfield_size);
+    check_gl ("glDrawElements failed");
+  }
+
   Frame& Renderer::begin (int width, int height, float alpha)
   {
     auto& frame = impl -> frame;
@@ -103,6 +131,9 @@ namespace Ad
     frame.alpha  = alpha;
 
     frame.model_items.clear ();
+
+    frame.starfield_geom = 0;
+    frame.starfield_size = 0;
 
   /*glBindVertexArray (0);
 
@@ -130,7 +161,8 @@ namespace Ad
     glClearColor (cc.x, cc.y, cc.z, cc.w);
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    impl -> render_models (frame);
+    impl -> render_models    (frame);
+    impl -> render_starfield (frame);
   }
 
   Renderer::Renderer () :

@@ -39,6 +39,9 @@ namespace Ad
 
     std::vector <ModelItem> model_items;
 
+    uint starfield_geom,
+         starfield_size;
+
   /*u8* buf_ptr;
     u8* buf_end;*/
 
@@ -52,6 +55,12 @@ namespace Ad
     {
       camera_pos = pos;
       camera_ori = ori;
+    }
+
+    void set_starfield (const Geom& geom)
+    {
+      starfield_geom = geom.name ();
+      starfield_size = geom.index_count ();
     }
 
   /*void draw (uint texture, const float* data, uint count, v2f translate, cxf rotate, v2f tc_scale = v2f (1, 1))
