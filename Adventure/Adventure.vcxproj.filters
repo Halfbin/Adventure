@@ -64,6 +64,9 @@
     <ClCompile Include="INI.cpp">
       <Filter>Frontend</Filter>
     </ClCompile>
+    <ClCompile Include="Universe.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Gusher.hpp">
@@ -139,6 +142,12 @@
       <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="INI.hpp">
+      <Filter>Frontend</Filter>
+    </ClInclude>
+    <ClInclude Include="Universe.hpp">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Init.hpp">
       <Filter>Frontend</Filter>
     </ClInclude>
   </ItemGroup>

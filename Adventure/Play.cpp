@@ -6,6 +6,7 @@
 
 #include "ModelShader.hpp"
 #include "Starfield.hpp"
+#include "Universe.hpp"
 #include "Texture.hpp"
 #include "Buffer.hpp"
 #include "Player.hpp"
@@ -13,6 +14,7 @@
 #include "Item.hpp"
 #include "INI.hpp"
 
+#include <iomanip>
 #include <sstream>
 
 #include <Rk/transform.hpp>
@@ -44,6 +46,20 @@ namespace Ad
         throw std::runtime_error ("Error parsing float in INI");
       if (value < min || value > max)
         throw std::runtime_error ("Float out-of-range in INI");
+    }
+
+    void grab_v3i (v3i& value, Rk::cstring_ref src, v3i mins = v3i {INT_MIN,INT_MIN,INT_MIN}, v3i maxs = v3i {INT_MAX,INT_MAX,INT_MAX})
+    {
+      auto str = Rk::to_string (src);
+      std::istringstream ss (str);
+      ss.setf (ss.skipws);
+      ss >> value.x; ss.ignore (5000, ',');
+      ss >> value.y; ss.ignore (5000, ',');
+      ss >> value.z;
+      if (ss.bad () || !ss.eof ())
+        throw std::runtime_error ("Error parsing v3i in INI");
+      if (Rk::inner (std::logical_or <> (), std::less <> (), value, mins) || Rk::inner (std::logical_or <> (), std::greater <> (), value, maxs))
+        throw std::runtime_error ("v3i out-of-range in INI");
     }
 
   }
@@ -134,10 +150,13 @@ namespace Ad
   class PlayPhase :
     public Phase
   {
+    UniverseCfg universe_cfg;
+
     Player::Ptr player;
     std::vector <Entity::Ptr> entities;
     CollisionState collide;
 
+    vec4f background_colour;
     Geom starfield;
 
     float t0, t1;
@@ -182,7 +201,7 @@ namespace Ad
 
     void render (Frame& frame)
     {
-      frame.clear_colour = { 0.00f, 0.012f, 0.03f, 1.00f };
+      frame.clear_colour = background_colour;
       frame.set_starfield (starfield);
 
       for (auto&& ent : entities)
@@ -217,10 +236,31 @@ namespace Ad
       starfield = make_starfield (size, seed, lambda, scale);
     }
 
-  public:
-    PlayPhase ()
+    void configure_background (INILoader& ini)
     {
-      INILoader ini ("../Data/Universe/test/test.ini");
+      vec3i bgcol;
+
+      for (;;)
+      {
+        auto stat = ini.proceed ();
+        if (stat != INIStatus::got_pair)
+          break;
+
+        if (ini.key () == "colour")
+          grab_v3i (bgcol, ini.value (), nil, v3i {255,255,255});
+      }
+
+      background_colour = compose_vector (bgcol / 255.0f, 1.0f);
+    }
+
+  public:
+    PlayPhase (InitContext& ctx) :
+      universe_cfg (load_universe (ctx, "Universe/universe.ini"))
+    {
+      background_colour = nil;
+
+      auto start_sys = universe_cfg [universe_cfg.start_system ()];
+      INILoader ini (ctx.data_rel (start_sys.path));
 
       for (;;)
       {
@@ -234,6 +274,8 @@ namespace Ad
         {
           if (ini.section () == "Starfield")
             configure_starfield (ini);
+          else if (ini.section () == "Background")
+            configure_background (ini);
         }
       }
 
@@ -244,9 +286,9 @@ namespace Ad
 
   };
 
-  Phase::Ptr create_play_phase ()
+  Phase::Ptr create_play_phase (InitContext& ctx)
   {
-    return std::make_unique <PlayPhase> ();
+    return std::make_unique <PlayPhase> (ctx);
   }
 
 }

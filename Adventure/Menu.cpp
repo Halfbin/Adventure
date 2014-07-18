@@ -83,7 +83,7 @@ namespace Ad
 
   };
 
-  Phase::Ptr create_menu ()
+  Phase::Ptr create_menu (InitContext&)
   {
     return std::make_unique <Menu> ();
   }

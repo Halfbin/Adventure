@@ -6,6 +6,7 @@
 
 #include "Frame.hpp"
 #include "Input.hpp"
+#include "Init.hpp"
 
 #include <memory>
 
@@ -24,12 +25,12 @@ namespace Ad
 
   };
 
-  Phase::Ptr create_menu ();
-  Phase::Ptr create_play_phase ();
+  Phase::Ptr create_menu       (InitContext&);
+  Phase::Ptr create_play_phase (InitContext&);
 
-  inline Phase::Ptr create_phase_0 ()
+  inline Phase::Ptr create_phase_0 (InitContext& ctx)
   {
-    return create_play_phase ();
+    return create_play_phase (ctx);
   }
 
 }

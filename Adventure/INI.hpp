@@ -7,7 +7,6 @@
 #include <Rk/string_ref.hpp>
 
 #include <vector>
-#include <map>
 
 namespace Ad
 {
@@ -26,8 +25,11 @@ namespace Ad
 
   public:
     INILoader (Rk::cstring_ref path);
+    ~INILoader ();
 
     INIStatus proceed ();
+
+    std::vector <char> release_buffer ();
 
     Rk::cstring_ref section () const;
     Rk::cstring_ref key     () const;

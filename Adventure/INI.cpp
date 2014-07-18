@@ -45,6 +45,11 @@ namespace Ad
 
     bool skip_hspace (Rk::utf8_decoder&);
 
+    Impl () :
+      cur (nullptr),
+      end (nullptr)
+    { }
+
   };
 
   INILoader::INILoader (Rk::cstring_ref path) :
@@ -57,6 +62,11 @@ namespace Ad
 
     impl->cur = impl->buffer.data ();
     impl->end = impl->cur + impl->buffer.size ();
+  }
+
+  INILoader::~INILoader ()
+  {
+    delete impl;
   }
 
   bool INILoader::Impl::skip_hspace (Rk::utf8_decoder& dec)
@@ -200,6 +210,13 @@ namespace Ad
 
     impl->cur = dec.get_pointer ();
     return INIStatus::got_pair;
+  }
+
+  std::vector <char> INILoader::release_buffer ()
+  {
+    auto buf = std::move (impl->buffer);
+    *impl = { };
+    return std::move (buf);
   }
 
   Rk::cstring_ref INILoader::section () const

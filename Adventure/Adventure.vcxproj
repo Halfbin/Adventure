@@ -151,6 +151,7 @@
     <ClCompile Include="StarfieldShader.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="Universe.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -174,6 +175,7 @@
     <ClInclude Include="GLError.hpp" />
     <ClInclude Include="Gusher.hpp" />
     <ClInclude Include="INI.hpp" />
+    <ClInclude Include="Init.hpp" />
     <ClInclude Include="Input.hpp" />
     <ClInclude Include="InputSystem.hpp" />
     <ClInclude Include="Item.hpp" />
@@ -189,6 +191,7 @@
     <ClInclude Include="StarfieldShader.hpp" />
     <ClInclude Include="stb_image.hpp" />
     <ClInclude Include="Texture.hpp" />
+    <ClInclude Include="Universe.hpp" />
     <ClInclude Include="Window.hpp" />
   </ItemGroup>
   <ItemGroup>

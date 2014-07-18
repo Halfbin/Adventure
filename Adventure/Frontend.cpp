@@ -14,18 +14,66 @@
 #include "Window.hpp"
 #include "Clock.hpp"
 #include "Phase.hpp"
+#include "INI.hpp"
 
 namespace Ad
 {
   class FrontendImpl :
     public Frontend
   {
+    std::string data_path;
+
     InputSystem in_sys;
     Window      win;
     GLContext   gl_ctx;
     bool        running;
     Phase::Ptr  phase;
     Syncer      syncer;
+
+    void load_paths (INILoader& ini)
+    {
+      for (;;)
+      {
+        auto stat = ini.proceed ();
+        if (stat == INIStatus::done_section)
+        {
+          break;
+        }
+        else if (stat == INIStatus::got_pair)
+        {
+          if (ini.key () == "data")
+            data_path = to_string (ini.value ());
+        }
+      }
+
+      if (data_path.empty ())
+        data_path = ".";
+
+      if (data_path.back () == '\\')
+        data_path.pop_back ();
+
+      if (data_path.back () != '/')
+        data_path.push_back ('/');
+    }
+
+    void load_config (Rk::cstring_ref path)
+    {
+      INILoader ini (path);
+
+      for (;;)
+      {
+        auto stat = ini.proceed ();
+        if (stat == INIStatus::done)
+        {
+          break;
+        }
+        else if (stat == INIStatus::got_section)
+        {
+          if (ini.section () == "Paths")
+            load_paths (ini);
+        }
+      }
+    }
 
   public:
     FrontendImpl () :
@@ -35,7 +83,10 @@ namespace Ad
     {
       win.on_close ([this] { running = false; });
 
-      phase = create_phase_0 ();
+      load_config ("Adventure.ini");
+
+      InitContext ctx = { data_path };
+      phase = create_phase_0 (ctx);
     }
 
     void run ()
