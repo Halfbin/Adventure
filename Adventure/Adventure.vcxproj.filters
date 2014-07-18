@@ -61,6 +61,9 @@
     <ClCompile Include="StarfieldShader.cpp">
       <Filter>Frontend\Graphics\Shaders\Starfield</Filter>
     </ClCompile>
+    <ClCompile Include="INI.cpp">
+      <Filter>Frontend</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Gusher.hpp">
@@ -135,20 +138,9 @@
     <ClInclude Include="Starfield.hpp">
       <Filter>Game</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Model-Frag.glsl">
-      <Filter>Frontend\Graphics\Shaders\Model</Filter>
-    </None>
-    <None Include="Model-Vert.glsl">
-      <Filter>Frontend\Graphics\Shaders\Model</Filter>
-    </None>
-    <None Include="Starfield-Frag.glsl">
-      <Filter>Frontend\Graphics\Shaders\Starfield</Filter>
-    </None>
-    <None Include="Starfield-Vert.glsl">
-      <Filter>Frontend\Graphics\Shaders\Starfield</Filter>
-    </None>
+    <ClInclude Include="INI.hpp">
+      <Filter>Frontend</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Game">
@@ -172,5 +164,19 @@
     <Filter Include="Frontend\Graphics\Shaders\Starfield">
       <UniqueIdentifier>{0c4c4704-13fd-4b01-a032-99453b295a30}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Model-Frag.glsl">
+      <Filter>Frontend\Graphics\Shaders\Model</Filter>
+    </Text>
+    <Text Include="Model-Vert.glsl">
+      <Filter>Frontend\Graphics\Shaders\Model</Filter>
+    </Text>
+    <Text Include="Starfield-Frag.glsl">
+      <Filter>Frontend\Graphics\Shaders\Starfield</Filter>
+    </Text>
+    <Text Include="Starfield-Vert.glsl">
+      <Filter>Frontend\Graphics\Shaders\Starfield</Filter>
+    </Text>
   </ItemGroup>
 </Project>

@@ -8,6 +8,6 @@
 
 namespace Ad
 {
-  Geom make_starfield (uint size, uint seed = 0x8e8b1a93);
+  Geom make_starfield (uint size, uint seed, float tight, float scale);
 
 }

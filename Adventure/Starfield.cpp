@@ -22,13 +22,13 @@ namespace Ad
       v4f col;
     };
 
-    Buffer make_stars (int count, int seed)
+    Buffer make_stars (uint size, uint seed, float tight, float scale)
     {
       std::mt19937 gen (seed);
       std::uniform_real_distribution <float> uni_dist (0.0f, 1.0f);
-      std::exponential_distribution  <float> exp_dist (3.5f);
+      std::exponential_distribution  <float> exp_dist (tight);
 
-      std::vector <Star> stars (count);
+      std::vector <Star> stars (size);
       for (auto& star : stars)
       {
         float theta = 2.0f * 3.14159265f * uni_dist (gen);
@@ -42,26 +42,25 @@ namespace Ad
           1
         };
 
-        float r = 1.2f * exp_dist (gen);
-
-        float scale = Rk::clamp (r, 0.0f, 1.0f);
+        float r = scale * exp_dist (gen);
+        float dim = Rk::clamp (r, 0.0f, 1.0f);
 
         star.col = v4f {
-          scale * (0.7f + 0.3f * uni_dist (gen)),
-          scale * (0.7f + 0.3f * uni_dist (gen)),
-          scale * (0.7f + 0.3f * uni_dist (gen)),
+          dim * (0.7f + 0.3f * uni_dist (gen)),
+          dim * (0.7f + 0.3f * uni_dist (gen)),
+          dim * (0.7f + 0.3f * uni_dist (gen)),
           r   
         };
       }
 
-      return Buffer (count * 32, stars.data ());
+      return Buffer (size * 32, stars.data ());
     }
 
   }
 
-  Geom make_starfield (uint size, uint seed)
+  Geom make_starfield (uint size, uint seed, float tight, float scale)
   {
-    auto stars = make_stars (size, seed);
+    auto stars = make_stars (size, seed, tight, scale);
 
     return Geom (
       { { StarfieldShader::attrib_vertpos, stars.name (), 4, GL_FLOAT, 32,  0 },

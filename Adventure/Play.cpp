@@ -11,6 +11,9 @@
 #include "Player.hpp"
 #include "Geom.hpp"
 #include "Item.hpp"
+#include "INI.hpp"
+
+#include <sstream>
 
 #include <Rk/transform.hpp>
 
@@ -18,45 +21,34 @@
 
 namespace Ad
 {
+  namespace
+  {
+    // shit.
+    void grab_int (int& value, Rk::cstring_ref src, int min = INT_MIN, int max = INT_MAX)
+    {
+      auto str = Rk::to_string (src);
+      std::istringstream ss (str);
+      ss >> value;
+      if (ss.bad () || !ss.eof ())
+        throw std::runtime_error ("Error parsing int in INI");
+      if (value < min || value > max)
+        throw std::runtime_error ("Integer out-of-range in INI");
+    }
+
+    void grab_float (float& value, Rk::cstring_ref src, float min = -FLT_MAX, float max = FLT_MAX)
+    {
+      auto str = Rk::to_string (src);
+      std::istringstream ss (str);
+      ss >> value;
+      if (ss.bad () || !ss.eof ())
+        throw std::runtime_error ("Error parsing float in INI");
+      if (value < min || value > max)
+        throw std::runtime_error ("Float out-of-range in INI");
+    }
+
+  }
+
   extern "C" __declspec (dllimport) void __stdcall OutputDebugStringA (const char*);
-
-/*Buffer make_floor_data ()
-  {
-    float data [] = {
-      -20.f, -20.f, 0.f,   0,  0, // 0
-       20.f, -20.f, 0.f,  10,  0, // 1
-       20.f,  20.f, 0.f,  10, 10, // 2
-      -20.f,  20.f, 0.f,   0, 10, // 3
-       40.f, -20.f, 15.f, 16.25f,  0, // 4
-       40.f,  20.f, 15.f, 16.25f, 10, // 5
-    };
-
-    return Buffer (sizeof (data), data);
-  }
-
-  Buffer make_floor_idxs ()
-  {
-    u8 idxs [] = { 0, 1, 2, 0, 2, 3, 1, 4, 5, 1, 5, 2 };
-    return Buffer (sizeof (idxs), idxs);
-  }
-
-  Geom make_floor ()
-  {
-    auto data = make_floor_data ();
-    auto idxs = make_floor_idxs ();
-
-    Attrib attribs [2] = {
-      { ModelShader::attrib_vertpos, data.name (), 3, GL_FLOAT, 20,  0 },
-      { ModelShader::attrib_tcoords, data.name (), 2, GL_FLOAT, 20, 12 }
-    };
-
-    auto geom = Geom (attribs, 2, idxs.name (), 12, GL_UNSIGNED_BYTE);
-
-    data.release ();
-    idxs.release ();
-
-    return geom;
-  }*/
 
   class CollisionState
   {
@@ -146,9 +138,6 @@ namespace Ad
     std::vector <Entity::Ptr> entities;
     CollisionState collide;
 
-  /*Geom         floor;
-    Texture::Ptr floor_tex;*/
-
     Geom starfield;
 
     float t0, t1;
@@ -193,10 +182,8 @@ namespace Ad
 
     void render (Frame& frame)
     {
-      frame.clear_colour = { 0.00f, 0.01f, 0.025f, 1.00f };
+      frame.clear_colour = { 0.00f, 0.012f, 0.03f, 1.00f };
       frame.set_starfield (starfield);
-
-      // frame.draw (floor, 0, floor.index_count (), floor_tex -> name (), {0,0,0,1}, nil, identity);
 
       for (auto&& ent : entities)
         ent -> draw (frame);
@@ -204,27 +191,53 @@ namespace Ad
       player -> draw (frame);
     }
 
-  public:
-    PlayPhase ()/* :
-      floor (make_floor ())*/
+    void configure_starfield (INILoader& ini)
     {
-      starfield = make_starfield (20000);
+      int   size = 0,
+            seed = 0;
+      float lambda = 3.5f,
+            scale = 1.2f;
+
+      for (;;)
+      {
+        auto stat = ini.proceed ();
+        if (stat != INIStatus::got_pair)
+          break;
+
+        if (ini.key () == "size")
+          grab_int (size, ini.value (), 1);
+        else if (ini.key () == "seed")
+          grab_int (seed, ini.value ());
+        else if (ini.key () == "lambda")
+          grab_float (lambda, ini.value (), 0.0f, 10.0f);
+        else if (ini.key () == "scale")
+          grab_float (scale, ini.value (), 0.0f, 100.0f);
+      }
+
+      starfield = make_starfield (size, seed, lambda, scale);
+    }
+
+  public:
+    PlayPhase ()
+    {
+      INILoader ini ("../Data/Universe/test/test.ini");
+
+      for (;;)
+      {
+        auto stat = ini.proceed ();
+
+        if (stat == INIStatus::done)
+        {
+          break;
+        }
+        else if (stat == INIStatus::got_section)
+        {
+          if (ini.section () == "Starfield")
+            configure_starfield (ini);
+        }
+      }
 
       player = create_player ();
-    /*add_entity (create_item ("Art/Globe1a.png", {-5,-5, 0}));
-      add_entity (create_item ("Art/Globe1a.png", { 5,-5, 0}));
-      add_entity (create_item ("Art/Globe1a.png", { 5, 5, 0}));
-      add_entity (create_item ("Art/Globe1a.png", {-5, 5, 0}));
-
-      floor_tex = Texture::create ("Art/Flags1a.png", TexFlags::nearest);
-
-      collide.add_plane ({ 0, 0, 1},   0);
-      collide.add_plane ({ 1, 0, 0}, -20);
-      collide.add_plane ({-1, 0, 0}, -40);
-      collide.add_plane ({ 0, 1, 0}, -20);
-      collide.add_plane ({ 0,-1, 0}, -20);
-
-      collide.add_plane ({-0.6f, 0, 0.8f}, -12);*/
     }
 
     ~PlayPhase () = default;
