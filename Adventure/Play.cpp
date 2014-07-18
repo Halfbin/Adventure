@@ -217,12 +217,9 @@ namespace Ad
       float lambda = 3.5f,
             scale = 1.2f;
 
-      for (;;)
+      INIStatus stat;
+      while ((stat = ini.proceed ()) == INIStatus::got_pair)
       {
-        auto stat = ini.proceed ();
-        if (stat != INIStatus::got_pair)
-          break;
-
         if (ini.key () == "size")
           grab_int (size, ini.value (), 1);
         else if (ini.key () == "seed")
@@ -240,12 +237,9 @@ namespace Ad
     {
       vec3i bgcol;
 
-      for (;;)
+      INIStatus stat;
+      while ((stat = ini.proceed ()) == INIStatus::got_pair)
       {
-        auto stat = ini.proceed ();
-        if (stat != INIStatus::got_pair)
-          break;
-
         if (ini.key () == "colour")
           grab_v3i (bgcol, ini.value (), nil, v3i {255,255,255});
       }
@@ -262,21 +256,16 @@ namespace Ad
       auto start_sys = universe_cfg [universe_cfg.start_system ()];
       INILoader ini (ctx.data_rel (start_sys.path));
 
-      for (;;)
+      INIStatus stat;
+      while ((stat = ini.proceed ()) != INIStatus::done)
       {
-        auto stat = ini.proceed ();
+        if (stat != INIStatus::got_section)
+          continue;
 
-        if (stat == INIStatus::done)
-        {
-          break;
-        }
-        else if (stat == INIStatus::got_section)
-        {
-          if (ini.section () == "Starfield")
-            configure_starfield (ini);
-          else if (ini.section () == "Background")
-            configure_background (ini);
-        }
+        if (ini.section () == "Starfield")
+          configure_starfield (ini);
+        else if (ini.section () == "Background")
+          configure_background (ini);
       }
 
       player = create_player ();

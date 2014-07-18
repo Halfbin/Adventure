@@ -32,18 +32,14 @@ namespace Ad
 
     void load_paths (INILoader& ini)
     {
-      for (;;)
+      INIStatus stat;
+      while ((stat = ini.proceed ()) != INIStatus::done_section)
       {
-        auto stat = ini.proceed ();
-        if (stat == INIStatus::done_section)
-        {
-          break;
-        }
-        else if (stat == INIStatus::got_pair)
-        {
-          if (ini.key () == "data")
-            data_path = to_string (ini.value ());
-        }
+        if (stat != INIStatus::got_pair)
+          continue;
+
+        if (ini.key () == "data")
+          data_path = to_string (ini.value ());
       }
 
       if (data_path.empty ())
@@ -60,18 +56,14 @@ namespace Ad
     {
       INILoader ini (path);
 
-      for (;;)
+      INIStatus stat;
+      while ((stat = ini.proceed ()) != INIStatus::done)
       {
-        auto stat = ini.proceed ();
-        if (stat == INIStatus::done)
-        {
-          break;
-        }
-        else if (stat == INIStatus::got_section)
-        {
-          if (ini.section () == "Paths")
-            load_paths (ini);
-        }
+        if (stat != INIStatus::got_section)
+          continue;
+
+        if (ini.section () == "Paths")
+          load_paths (ini);
       }
     }
 

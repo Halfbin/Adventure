@@ -12,20 +12,16 @@ namespace Ad
   {
     SystemCfg sys;
 
-    for (;;)
+    INIStatus stat;
+    while ((stat = ini.proceed ()) != INIStatus::done_section)
     {
-      auto stat = ini.proceed ();
-      if (stat == INIStatus::done_section)
-      {
-        break;
-      }
-      else if (stat == INIStatus::got_pair)
-      {
-        if (ini.key () == "name")
-          sys.name = ini.value ();
-        else if (ini.key () == "path")
-          sys.path = ini.value ();
-      }
+      if (stat != INIStatus::got_pair)
+        continue;
+
+      if (ini.key () == "name")
+        sys.name = ini.value ();
+      else if (ini.key () == "path")
+        sys.path = ini.value ();
     }
 
     if (!sys.name)
@@ -38,18 +34,14 @@ namespace Ad
 
   void load_dev_config (INILoader& ini, Rk::cstring_ref& start)
   {
-    for (;;)
+    INIStatus stat;
+    while ((stat = ini.proceed ()) != INIStatus::done_section)
     {
-      auto stat = ini.proceed ();
-      if (stat == INIStatus::done_section)
-      {
-        break;
-      }
-      else if (stat == INIStatus::got_pair)
-      {
-        if (ini.key () == "start")
-          start = ini.value ();
-      }
+      if (stat != INIStatus::got_pair)
+        continue;
+
+      if (ini.key () == "start")
+        start = ini.value ();
     }
   }
 
@@ -60,20 +52,16 @@ namespace Ad
     std::map <Rk::cstring_ref, SystemCfg, CStringLess> systems;
     Rk::cstring_ref start;
 
-    for (;;)
+    INIStatus stat;
+    while ((stat = ini.proceed ()) != INIStatus::done)
     {
-      auto stat = ini.proceed ();
-      if (stat == INIStatus::done)
-      {
-        break;
-      }
-      else if (stat == INIStatus::got_section)
-      {
-        if (ini.section () == "System")
-          load_system_config (ini, systems);
-        else if (ini.section () == "Dev")
-          load_dev_config (ini, start);
-      }
+      if (stat != INIStatus::got_section)
+        continue;
+
+      if (ini.section () == "System")
+        load_system_config (ini, systems);
+      else if (ini.section () == "Dev")
+        load_dev_config (ini, start);
     }
 
     if (systems.empty ())
