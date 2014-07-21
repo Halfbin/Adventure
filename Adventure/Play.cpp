@@ -12,6 +12,7 @@
 #include "Player.hpp"
 #include "Geom.hpp"
 #include "Item.hpp"
+#include "Star.hpp"
 #include "INI.hpp"
 
 #include <iomanip>
@@ -60,6 +61,20 @@ namespace Ad
         throw std::runtime_error ("Error parsing v3i in INI");
       if (Rk::inner (std::logical_or <> (), std::less <> (), value, mins) || Rk::inner (std::logical_or <> (), std::greater <> (), value, maxs))
         throw std::runtime_error ("v3i out-of-range in INI");
+    }
+
+    void grab_v3f (v3f& value, Rk::cstring_ref src, v3f mins = v3f {-FLT_MAX,-FLT_MAX,-FLT_MAX}, v3f maxs = v3f {FLT_MAX,FLT_MAX,FLT_MAX})
+    {
+      auto str = Rk::to_string (src);
+      std::istringstream ss (str);
+      ss.setf (ss.skipws);
+      ss >> value.x; ss.ignore (5000, ',');
+      ss >> value.y; ss.ignore (5000, ',');
+      ss >> value.z;
+      if (ss.bad () || !ss.eof ())
+        throw std::runtime_error ("Error parsing v3f in INI");
+      if (Rk::inner (std::logical_or <> (), std::less <> (), value, mins) || Rk::inner (std::logical_or <> (), std::greater <> (), value, maxs))
+        throw std::runtime_error ("v3f out-of-range in INI");
     }
 
   }
@@ -247,6 +262,31 @@ namespace Ad
       background_colour = compose_vector (bgcol / 255.0f, 1.0f);
     }
 
+    void configure_ent (INILoader& ini)
+    {
+      vec3i pos = {0,0,0};
+      vec3f rot = {0,0,0};
+      Rk::cstring_ref name;
+
+      INIStatus stat;
+      while ((stat = ini.proceed ()) == INIStatus::got_pair)
+      {
+        if (ini.key () == "name")
+          name = ini.value ();
+        else if (ini.key () == "pos")
+          grab_v3i (pos, ini.value ());
+        else if (ini.key () == "rot")
+          grab_v3f (rot, ini.value ());
+      }
+
+      static const float d2r = 0.01745329251f;
+      vsf ori = Rk::rotation (d2r * rot.x, v3f {1,0,0})
+              * Rk::rotation (d2r * rot.y, v3f {0,1,0})
+              * Rk::rotation (d2r * rot.z, v3f {0,0,1});
+
+      add_entity (make_star (pos, ori));
+    }
+
   public:
     PlayPhase (InitContext& ctx) :
       universe_cfg (load_universe (ctx, "Universe/universe.ini"))
@@ -266,6 +306,8 @@ namespace Ad
           configure_starfield (ini);
         else if (ini.section () == "Background")
           configure_background (ini);
+        else if (ini.section () == "Entity")
+          configure_ent (ini);
       }
 
       player = create_player ();

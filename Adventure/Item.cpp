@@ -39,7 +39,7 @@ namespace Ad
 
       auto scale = 0.4f;
       auto offset = Rk::conj (draw_ori, v3f (0, 0, scale));
-      frame.draw (gusher, 0, gusher.index_count (), 0, { 1.f, 0.f, 0.f, 0.90f }, draw_pos + offset, draw_ori, { scale, scale, scale });
+      frame.draw (layer_solar, gusher, 0, gusher.index_count (), 0, { 1.f, 0.f, 0.f, 0.90f }, draw_pos + offset, draw_ori, { scale, scale, scale });
     }
 
     virtual void collide (v3f normal, float pdist)

@@ -21,22 +21,22 @@ namespace Ad
     const float c = 0.5f;          // cos 60 =    1     / 2
 
     const v3f gusher_verts [14] = {
-      { 0, 0, -0.75f }, // 0 bottom
-      { 0, 0,  0.75f }, // 1 top
+      { 0, 0, -1.0f }, // 0 bottom
+      { 0, 0,  1.0f }, // 1 top
 
-      { -1.f, 0.f, -0.33f }, // 2 lower hex
-      {   -c,  -s, -0.33f }, // 3
-      {    c,  -s, -0.33f }, // 4
-      {  1.f, 0.f, -0.33f }, // 5
-      {    c,   s, -0.33f }, // 6
-      {   -c,   s, -0.33f }, // 7
+      { -1.f, 0.f, -0.5f }, // 2 lower hex
+      {   -c,  -s, -0.5f }, // 3
+      {    c,  -s, -0.5f }, // 4
+      {  1.f, 0.f, -0.5f }, // 5
+      {    c,   s, -0.5f }, // 6
+      {   -c,   s, -0.5f }, // 7
 
-      { -1.f, 0.f, 0.33f }, // 8 upper hex
-      {   -c,  -s, 0.33f }, // 9
-      {    c,  -s, 0.33f }, // 10
-      {  1.f, 0.f, 0.33f }, // 11
-      {    c,   s, 0.33f }, // 12
-      {   -c,   s, 0.33f }  // 13
+      { -1.f, 0.f,  0.5f }, // 8 upper hex
+      {   -c,  -s,  0.5f }, // 9
+      {    c,  -s,  0.5f }, // 10
+      {  1.f, 0.f,  0.5f }, // 11
+      {    c,   s,  0.5f }, // 12
+      {   -c,   s,  0.5f }  // 13
     };
 
     const u8 gusher_tris [72] = {
@@ -107,10 +107,10 @@ namespace Ad
     Buffer idxs (mod.idxs.size  () * sizeof (u8),   mod.idxs.data  ());
 
     auto geom = Geom (
-      { { ModelShader::attrib_vertpos, data.name (), 3, GL_FLOAT, 24,  0 },
-        { ModelShader::attrib_normal,  data.name (), 3, GL_FLOAT, 24, 12 } },
+      { { ModelShader::attrib_vertpos, data.name (), 3, GL_FLOAT, 24,  0 }/*,
+        { ModelShader::attrib_normal,  data.name (), 3, GL_FLOAT, 24, 12 }*/ },
       idxs.name (),
-      mod.idxs.size (),
+      (uint) mod.idxs.size (),
       GL_UNSIGNED_BYTE
     );
 

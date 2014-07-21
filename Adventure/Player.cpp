@@ -4,15 +4,35 @@
 
 #include "Player.hpp"
 
+#include "Constants.hpp"
 #include "Texture.hpp"
 
 #include <Rk/clamp.hpp>
 
 namespace Ad
 {
+  template <typename T>
+  void key_axis (T& value, KeyState positive, KeyState negative)
+  {
+    if (positive || negative)
+    {
+      if (!negative)
+        value =  1;
+      else if (!positive)
+        value = -1;
+      else if (positive.changed || negative.changed)
+        value = -value;
+    }
+    else
+    {
+      value = 0;
+    }
+  }
+
   class PlayerImpl :
     public Player
   {
+    v3f solar_pos;
     v3f prev_pos;
     v3f speed;
     v3f dir;
@@ -23,31 +43,19 @@ namespace Ad
     {
       using namespace Keys;
 
-      // Looking
+      // Rotate
       auto cw  = ctx.keys [cw_key ],
            ccw = ctx.keys [ccw_key];
 
-      if (cw || ccw)
-      {
-        if (!ccw)
-          rolling =  1;
-        else if (!cw) 
-          rolling = -1;
-        else if (cw.changed || ccw.changed)
-          rolling = -rolling;
-      }
-      else
-      {
-        rolling = 0;
-      }
+      key_axis (rolling, cw, ccw);
 
-      vsf yaw   = Rk::rotation (-0.001f * ctx.pointer.x, v3f (0, 0, 1));
-      vsf pitch = Rk::rotation ( 0.001f * ctx.pointer.y, v3f (0, 1, 0));
       vsf roll  = Rk::rotation ( 0.020f * rolling,       v3f (1, 0, 0));
+      vsf pitch = Rk::rotation ( 0.001f * ctx.pointer.y, v3f (0, 1, 0));
+      vsf yaw   = Rk::rotation (-0.001f * ctx.pointer.x, v3f (0, 0, 1));
 
-      ori = unit (ori * pitch * yaw * roll);
+      ori = unit (ori * roll * pitch * yaw);
 
-      // Walking
+      // Translate
       auto forward = ctx.keys [forward_key],
            left    = ctx.keys [left_key   ],
            back    = ctx.keys [back_key   ],
@@ -55,47 +63,9 @@ namespace Ad
            drop    = ctx.keys [drop_key   ],
            rise    = ctx.keys [rise_key   ];
 
-      if (forward || back)
-      {
-        if (!back)
-          dir.x =  1;
-        else if (!forward)
-          dir.x = -1;
-        else if (forward.changed || back.changed)
-          dir.x = -dir.x;
-      }
-      else
-      {
-        dir.x = 0;
-      }
-
-      if (left || right)
-      {
-        if (!right)
-          dir.y =  1;
-        else if (!left) 
-          dir.y = -1;
-        else if (left.changed || right.changed)
-          dir.y = -dir.y;
-      }
-      else
-      {
-        dir.y = 0;
-      }
-
-      if (rise || drop)
-      {
-        if (!drop)
-          dir.z =  1;
-        else if (!rise) 
-          dir.z = -1;
-        else if (rise.changed || drop.changed)
-          dir.z = -dir.z;
-      }
-      else
-      {
-        dir.z = 0;
-      }
+      key_axis (dir.x, forward, back );
+      key_axis (dir.y, left,    right);
+      key_axis (dir.z, rise,    drop );
     }
 
     void advance (float time, float step)
@@ -109,7 +79,7 @@ namespace Ad
     {
       v3f eye_off { 0, 0, 0 };
       auto draw_pos = Rk::lerp (prev_pos, pos, frame.alpha);
-      frame.set_camera (pos + eye_off, ori);
+      frame.set_camera (solar_pos + pos, 100.f, 1000000.f, pos + eye_off, 0.1f, 1000.f, ori);
     }
 
     void collide (v3f normal, float pdist)
@@ -125,6 +95,8 @@ namespace Ad
     {
       bbox_mins = {-0.4f,-0.4f, 0.0f};
       bbox_maxs = { 0.4f, 0.4f, 1.8f};
+
+      solar_pos = {2000.f, 0.f, 0.f};
 
       prev_pos = pos;
       dir = nil;

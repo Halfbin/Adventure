@@ -22,6 +22,8 @@ namespace Ad
       v4f col;
     };
 
+    static_assert (sizeof (Star) == 32, "uh oh");
+
     Buffer make_stars (uint size, uint seed, float tight, float scale)
     {
       std::mt19937 gen (seed);
@@ -53,7 +55,7 @@ namespace Ad
         };
       }
 
-      return Buffer (size * 32, stars.data ());
+      return Buffer (stars.size () * sizeof (Star), stars.data ());
     }
 
   }
@@ -62,13 +64,16 @@ namespace Ad
   {
     auto stars = make_stars (size, seed, tight, scale);
 
-    return Geom (
+    auto geom = Geom (
       { { StarfieldShader::attrib_vertpos, stars.name (), 4, GL_FLOAT, 32,  0 },
         { StarfieldShader::attrib_colour,  stars.name (), 4, GL_FLOAT, 32, 16 } },
       0,
       size,
       0
     );
+
+    stars.release ();
+    return geom;
   }
 
 }

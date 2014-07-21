@@ -67,6 +67,9 @@
     <ClCompile Include="Universe.cpp">
       <Filter>Game</Filter>
     </ClCompile>
+    <ClCompile Include="Star.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Gusher.hpp">
@@ -149,6 +152,12 @@
     </ClInclude>
     <ClInclude Include="Init.hpp">
       <Filter>Frontend</Filter>
+    </ClInclude>
+    <ClInclude Include="Constants.hpp">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Star.hpp">
+      <Filter>Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

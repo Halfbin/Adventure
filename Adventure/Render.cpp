@@ -52,10 +52,6 @@ namespace Ad
 
   void Renderer::Impl::render_models (const Frame& frame)
   {
-    m4f e2c = Rk::eye_to_clip (75.0f, float (frame.width) / float (frame.height), 0.1f, 1000.0f);
-    m4f w2e = Rk::world_to_eye (frame.camera_pos, frame.camera_ori);
-    auto w2c = e2c * w2e;
-
     model_shader.use ();
 
     glActiveTexture (GL_TEXTURE0 + model_shader.tex_unit);
@@ -64,21 +60,34 @@ namespace Ad
     glEnable (GL_DEPTH_TEST);
     glEnable (GL_BLEND);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    uint prev_layer = 0xffffffff;
+    m4f world_to_clip;
 
     for (auto item : frame.model_items)
     {
-      auto m2w = Rk::affine (item.trn, item.rot);
+      if (item.layer != prev_layer)
+      {
+        glClear (GL_DEPTH_BUFFER_BIT);
+        auto eye_to_clip = Rk::eye_to_clip (75.0f, float (frame.width) / float (frame.height), frame.camera_near [item.layer], frame.camera_far [item.layer]);
+        auto world_to_eye = Rk::world_to_eye (frame.camera_pos [item.layer], frame.camera_ori);
+        world_to_clip = eye_to_clip * world_to_eye;
 
-      glUniformMatrix4fv (model_shader.model_to_world (), 1, true, reinterpret_cast <const float*> (&m2w));
+        prev_layer = item.layer;
+      }
+
+      auto model_to_world = Rk::affine (item.trn, item.rot);
+
+      glUniformMatrix4fv (model_shader.model_to_world (), 1, true, reinterpret_cast <const float*> (&model_to_world));
       check_gl ("glUniformMatrix4fv failed");
 
       for (int i = 0; i != 3; i++)
       for (int j = 0; j != 3; j++)
-        m2w (i, j) *= item.scale [i];
+        model_to_world (i, j) *= item.scale [i];
 
-      auto m2c = w2c * m2w;
+      auto model_to_clip = world_to_clip * model_to_world;
 
-      glUniformMatrix4fv (model_shader.model_to_clip (), 1, true, reinterpret_cast <const float*> (&m2c));
+      glUniformMatrix4fv (model_shader.model_to_clip (), 1, true, reinterpret_cast <const float*> (&model_to_clip));
       check_gl ("glUniformMatrix4fv failed");
 
       glVertexAttrib4fv (model_shader.attrib_colour, reinterpret_cast <const float*> (&item.colour));
@@ -110,7 +119,6 @@ namespace Ad
     glUniformMatrix4fv (starfield_shader.sky_to_clip (), 1, true, reinterpret_cast <const float*> (&s2c));
 
     glEnable (GL_PROGRAM_POINT_SIZE);
-    //glEnable (GL_POINT_SMOOTH);
     glDisable (GL_CULL_FACE);
     glEnable  (GL_DEPTH_TEST);
     glDisable (GL_BLEND);
@@ -124,7 +132,7 @@ namespace Ad
 
   Frame& Renderer::begin (int width, int height, float alpha)
   {
-    auto& frame = impl -> frame;
+    auto& frame = impl->frame;
 
     frame.width  = width;
     frame.height = height;
@@ -151,18 +159,27 @@ namespace Ad
 
   void Renderer::end ()
   {
-    auto& frame = impl -> frame;
+    auto& frame = impl->frame;
     
   //auto ok = glUnmapBuffer (GL_ARRAY_BUFFER);
 
     glViewport (0, 0, frame.width, frame.height);
 
+    // Sort models by layer, back-to-front
+    auto& models = impl->frame.model_items;
+    std::sort (
+      models.begin (),
+      models.end (),
+      [] (const Frame::ModelItem& lhs, const Frame::ModelItem& rhs) { return lhs.layer < rhs.layer; }
+    );
+
     auto cc = frame.clear_colour;
     glClearColor (cc.x, cc.y, cc.z, cc.w);
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    impl -> render_models    (frame);
     impl -> render_starfield (frame);
+
+    impl -> render_models (frame);
+    
   }
 
   Renderer::Renderer () :

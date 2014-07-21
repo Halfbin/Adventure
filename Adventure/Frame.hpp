@@ -17,13 +17,20 @@ namespace Ad
 {
   typedef std::complex <float> cxf;
 
+  enum FrameLayer
+  {
+    layer_solar = 0,
+    layer_field
+  };
+
   class Frame
   {
     friend class Renderer;
 
     struct ModelItem
     {
-      uint geom,
+      uint layer,
+           geom,
            idx_type,
            first_idx,
            idx_count,
@@ -34,8 +41,11 @@ namespace Ad
       v3f  scale;
     };
 
-    v3f camera_pos;
+    v3f camera_pos [2];
     vsf camera_ori;
+
+    float camera_near [2],
+          camera_far  [2];
 
     std::vector <ModelItem> model_items;
 
@@ -51,9 +61,14 @@ namespace Ad
 
     vec4f clear_colour;
 
-    void set_camera (v3f pos, vsf ori)
+    void set_camera (v3f pos_solar, float zns, float zfs, v3f pos_field, float znf, float zff, vsf ori)
     {
-      camera_pos = pos;
+      camera_pos  [layer_solar] = pos_solar;
+      camera_pos  [layer_field] = pos_field;
+      camera_near [layer_solar] = zns;
+      camera_far  [layer_solar] = zfs;
+      camera_near [layer_field] = znf;
+      camera_far  [layer_field] = zff;
       camera_ori = ori;
     }
 
@@ -73,6 +88,7 @@ namespace Ad
     }*/
 
     void draw (
+      FrameLayer layer,
       const Geom& geom, 
       uint first_idx,
       uint idx_count,
@@ -83,7 +99,7 @@ namespace Ad
       v3f scale = { 1.f, 1.f, 1.f })
     {
       model_items.push_back (
-        ModelItem { geom.name (), geom.index_type (), first_idx, idx_count, tex, colour, translate, rotate, scale }
+        ModelItem { layer, geom.name (), geom.index_type (), first_idx, idx_count, tex, colour, translate, rotate, scale }
       );
     }
 
