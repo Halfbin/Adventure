@@ -4,9 +4,6 @@
     <ClCompile Include="Gusher.cpp">
       <Filter>Game</Filter>
     </ClCompile>
-    <ClCompile Include="Item.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
     <ClCompile Include="Menu.cpp">
       <Filter>Game</Filter>
     </ClCompile>
@@ -73,9 +70,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Gusher.hpp">
-      <Filter>Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Item.hpp">
       <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="Player.hpp">
