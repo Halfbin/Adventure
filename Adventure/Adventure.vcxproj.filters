@@ -199,9 +199,17 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="Model-Frag.glsl" />
-    <CustomBuild Include="Model-Vert.glsl" />
-    <CustomBuild Include="Starfield-Frag.glsl" />
-    <CustomBuild Include="Starfield-Vert.glsl" />
+    <CustomBuild Include="Model-Frag.glsl">
+      <Filter>Frontend\Graphics\Shaders\Model</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Model-Vert.glsl">
+      <Filter>Frontend\Graphics\Shaders\Model</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Starfield-Vert.glsl">
+      <Filter>Frontend\Graphics\Shaders\Starfield</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Starfield-Frag.glsl">
+      <Filter>Frontend\Graphics\Shaders\Starfield</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>
