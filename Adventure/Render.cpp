@@ -90,10 +90,11 @@ namespace Ad
       glUniformMatrix4fv (model_shader.model_to_clip (), 1, true, reinterpret_cast <const float*> (&model_to_clip));
       check_gl ("glUniformMatrix4fv failed");
 
-      glVertexAttrib4fv (model_shader.attrib_colour, reinterpret_cast <const float*> (&item.colour));
+      v4f col { 1.0f, 0.0f, 0.0f, 1.0f };
+      glVertexAttrib4fv (model_shader.attrib_colour, reinterpret_cast <const float*> (&col));
       check_gl ("glVertexAttrib4f failed");
 
-      glBindTexture (GL_TEXTURE_2D, item.tex);
+      glBindTexture (GL_TEXTURE_2D, 0);//item.tex);
       check_gl ("glBindTexture failed");
 
       glVertexAttrib4f (model_shader.attrib_normal, 0, 0, 0, 0);
@@ -101,8 +102,13 @@ namespace Ad
       glBindVertexArray (item.geom);
       check_gl ("glBindVertexArray failed");
 
-      glDrawElementsBaseVertex (GL_TRIANGLES, item.idx_count, item.idx_type, nullptr, item.first_idx);
-      check_gl ("glDrawElements failed");
+      for (auto i_mesh = item.first_mesh; i_mesh != item.first_mesh + item.mesh_count; i_mesh++)
+      {
+        const auto& mesh = frame.mesh_items [i_mesh];
+
+        glDrawElementsBaseVertex (mesh.type, mesh.count, item.idx_type, (const void*) uptr (mesh.first * 2), mesh.base);
+        check_gl ("glDrawElements failed");
+      }
     }
   }
 

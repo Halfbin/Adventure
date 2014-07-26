@@ -6,6 +6,8 @@
 
 #include "Gusher.hpp"
 
+#include <GL/glew.h>
+
 namespace Ad
 {
 /*void triangle (v3f a, v3f b, v3f c, int level, int max_level)
@@ -41,7 +43,7 @@ namespace Ad
     {
       // sun equatorial radius ~700 000 km = 7e8 m
       //                                   = 7e2 su
-      frame.draw (layer_solar, geom, 0, geom.index_count (), 0, v4f (1.0f, 1.0f, 0.2f, 1.0f), pos, ori, v3f (7e2f, 7e2f, 7e2f));
+      frame.draw (layer_solar, geom, GL_TRIANGLES, solar_pos, ori, v3f (7e2f, 7e2f, 7e2f));
     }
 
     void collide (v3f normal, float pdist)

@@ -46,9 +46,6 @@
     <ClCompile Include="GLContext.cpp">
       <Filter>Frontend\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>Frontend\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="Starfield.cpp">
       <Filter>Game</Filter>
     </ClCompile>
@@ -165,6 +162,9 @@
     </ClInclude>
     <ClInclude Include="FLUTF.hpp">
       <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.hpp">
+      <Filter>Frontend\Graphics</Filter>
     </ClInclude>
       <Filter>Game</Filter>
     </ClInclude>

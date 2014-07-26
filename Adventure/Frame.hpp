@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Geom.hpp"
+#include "Mesh.hpp"
 
 #include <Rk/matrix.hpp>
 #include <Rk/memory.hpp>
@@ -32,10 +33,8 @@ namespace Ad
       uint layer,
            geom,
            idx_type,
-           first_idx,
-           idx_count,
-           tex;
-      v4f  colour;
+           first_mesh,
+           mesh_count;
       v3f  trn;
       vsf  rot;
       v3f  scale;
@@ -47,6 +46,7 @@ namespace Ad
     float camera_near [2],
           camera_far  [2];
 
+    std::vector <Mesh> mesh_items;
     std::vector <ModelItem> model_items;
 
     uint starfield_geom,
@@ -90,17 +90,30 @@ namespace Ad
     void draw (
       FrameLayer layer,
       const Geom& geom, 
-      uint first_idx,
-      uint idx_count,
-      uint tex,
-      v4f colour,
+      const Mesh* meshes,
+      size_t mesh_count,
       v3f translate,
       vsf rotate = identity,
       v3f scale = { 1.f, 1.f, 1.f })
     {
+      auto first_mesh = mesh_items.size ();
+      mesh_items.insert (mesh_items.end (), meshes, meshes + mesh_count);
+
       model_items.push_back (
-        ModelItem { layer, geom.name (), geom.index_type (), first_idx, idx_count, tex, colour, translate, rotate, scale }
+        ModelItem { layer, geom.name (), geom.index_type (), (uint) first_mesh, (uint) mesh_count, translate, rotate, scale }
       );
+    }
+
+    void draw (
+      FrameLayer layer,
+      const Geom& geom, 
+      uint prim_type,
+      v3f translate,
+      vsf rotate = identity,
+      v3f scale = { 1.f, 1.f, 1.f })
+    {
+      Mesh mesh { prim_type, 0, 0, geom.index_count () };
+      draw (layer, geom, &mesh, 1, translate, rotate, scale);
     }
 
   };
