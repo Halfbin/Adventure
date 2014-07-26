@@ -12,7 +12,7 @@ namespace Ad
   {
     Rk::cstring_ref data_path;
 
-    std::string data_rel (Rk::cstring_ref rel)
+    std::string data_rel (Rk::cstring_ref rel) const
     {
       return to_string (data_path).append (rel.data (), rel.length ());
     }
