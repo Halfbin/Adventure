@@ -111,6 +111,10 @@ namespace Ad
       case WM_RBUTTONDOWN: events.push_back (button_event (Buttons::right,  true )); return 0;
       case WM_RBUTTONUP:   events.push_back (button_event (Buttons::right,  false)); return 0;
 
+      case WM_MOUSEWHEEL:
+        wheel_delta = 1.0f * (i16) HIWORD (wp);
+      return 0;
+
       case WM_INPUT:
         if (!focus || wp == RIM_INPUTSINK)
           break;
