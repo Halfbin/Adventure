@@ -150,6 +150,9 @@
     <ClInclude Include="Init.hpp">
       <Filter>Frontend</Filter>
     </ClInclude>
+    <ClInclude Include="CStringRefLess.hpp">
+      <Filter>Game</Filter>
+    </ClInclude>
     <ClInclude Include="Constants.hpp">
       <Filter>Game</Filter>
     </ClInclude>
