@@ -5,6 +5,7 @@
 #include "Phase.hpp"
 
 #include "ModelShader.hpp"
+#include "ShipTypes.hpp"
 #include "Starfield.hpp"
 #include "Universe.hpp"
 #include "Texture.hpp"
@@ -166,6 +167,8 @@ namespace Ad
     public Phase
   {
     UniverseCfg universe_cfg;
+    ShipTypes ship_types;
+    std::map <std::string, v3f> points;
 
     Player::Ptr player;
     std::vector <Entity::Ptr> entities;
@@ -289,7 +292,8 @@ namespace Ad
 
   public:
     PlayPhase (InitContext& ctx) :
-      universe_cfg (load_universe (ctx, "Universe/universe.ini"))
+      universe_cfg (load_universe (ctx, "Universe/universe.ini")),
+      ship_types (load_ship_types (ctx, "Ships/ShipTypes.ini"))
     {
       background_colour = nil;
 
@@ -310,7 +314,7 @@ namespace Ad
           configure_ent (ini);
       }
 
-      player = create_player ();
+      auto start_ship = ship_types [universe_cfg.start_ship_type ()];
     }
 
     ~PlayPhase () = default;

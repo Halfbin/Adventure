@@ -147,6 +147,7 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="ShipTypes.cpp" />
     <ClCompile Include="Star.cpp" />
     <ClCompile Include="Starfield.cpp" />
     <ClCompile Include="StarfieldShader.cpp" />
@@ -190,6 +191,7 @@
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="Render.hpp" />
     <ClInclude Include="Shader.hpp" />
+    <ClInclude Include="ShipTypes.hpp" />
     <ClInclude Include="Star.hpp" />
     <ClInclude Include="Starfield.hpp" />
     <ClInclude Include="StarfieldShader.hpp" />

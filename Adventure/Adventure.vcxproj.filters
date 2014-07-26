@@ -67,6 +67,9 @@
     <ClCompile Include="Star.cpp">
       <Filter>Game</Filter>
     </ClCompile>
+    <ClCompile Include="ShipTypes.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
     <ClCompile Include="FLUTF.cpp">
       <Filter>Game</Filter>
     </ClCompile>
@@ -157,6 +160,9 @@
       <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="Star.hpp">
+    <ClInclude Include="ShipTypes.hpp">
+      <Filter>Game</Filter>
+    </ClInclude>
     <ClInclude Include="FLUTF.hpp">
       <Filter>Game</Filter>
     </ClInclude>
