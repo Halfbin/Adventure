@@ -61,6 +61,7 @@ namespace Ad
   void InputSystem::begin_update ()
   {
     pointer = { 0, 0 };
+    wheel_delta = 0.0f;
     events.clear ();
     for (auto& ks : keys)
       ks.changed = false;
@@ -76,6 +77,7 @@ namespace Ad
     ctx.keys = keys;
     ctx.buttons = buttons;
     ctx.pointer = pointer;
+    ctx.wheel   = wheel_delta;
     return ctx;
   }
 
@@ -144,6 +146,12 @@ namespace Ad
 
       down_flag <<= 2;
       up_flag   <<= 2;
+    }
+
+    if (button_state & 0x400)
+    {
+      wheel_delta = i16 (rm.usButtonData) * 1.0f;
+      events.push_back (wheel_event (wheel_delta));
     }
 
     v2i pointer_instant = { rm.lLastX, rm.lLastY };

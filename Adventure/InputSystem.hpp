@@ -20,6 +20,7 @@ namespace Ad
     std::vector <Event> events;
     v2i                 pointer,
                         pointer_prev;
+    float               wheel_delta;
     KeyState            keys    [Keys::count];
     ButtonState         buttons [Buttons::count];
 

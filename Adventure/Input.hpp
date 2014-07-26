@@ -133,7 +133,8 @@ namespace Ad
     {
       key,
       button,
-      pointer
+      pointer,
+      wheel
     };
 
   };
@@ -228,6 +229,16 @@ namespace Ad
     return Event (Events::pointer, PointerEvent { delta });
   }
 
+  struct WheelEvent
+  {
+    float delta;
+  };
+
+  inline Event wheel_event (float delta)
+  {
+    return Event (Events::wheel, WheelEvent { delta });
+  }
+
 }
 
 namespace Rk
@@ -279,6 +290,7 @@ namespace Ad
     const KeyState*    keys;
     const ButtonState* buttons;
     v2i                pointer;
+    float              wheel;
 
   };
 
