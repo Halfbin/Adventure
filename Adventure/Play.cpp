@@ -12,7 +12,6 @@
 #include "Buffer.hpp"
 #include "Player.hpp"
 #include "Geom.hpp"
-#include "Item.hpp"
 #include "Star.hpp"
 #include "INI.hpp"
 
@@ -290,6 +289,23 @@ namespace Ad
       add_entity (make_star (pos, ori));
     }
 
+    void configure_point (INILoader& ini)
+    {
+      std::string name;
+      vec3f pos = {0,0,0};
+
+      INIStatus stat;
+      while ((stat = ini.proceed ()) == INIStatus::got_pair)
+      {
+        if (ini.key () == "name")
+          name = to_string (ini.value ());
+        else if (ini.key () == "pos")
+          grab_v3f (pos, ini.value ());
+      }
+
+      points [name] = pos;
+    }
+
   public:
     PlayPhase (InitContext& ctx) :
       universe_cfg (load_universe (ctx, "Universe/universe.ini")),
@@ -312,9 +328,18 @@ namespace Ad
           configure_background (ini);
         else if (ini.section () == "Entity")
           configure_ent (ini);
+        else if (ini.section () == "Point")
+          configure_point (ini);
       }
 
       auto start_ship = ship_types [universe_cfg.start_ship_type ()];
+
+      v3f player_pos = {0,0,0};
+      auto iter = points.find ("spawn");
+      if (iter != points.end ())
+        player_pos = iter->second;
+
+      player = create_player (ctx, start_ship, {0,0,0}, player_pos, identity);
     }
 
     ~PlayPhase () = default;

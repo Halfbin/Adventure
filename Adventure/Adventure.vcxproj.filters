@@ -67,6 +67,9 @@
     <ClCompile Include="ShipTypes.cpp">
       <Filter>Game</Filter>
     </ClCompile>
+    <ClCompile Include="FLModel.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
     <ClCompile Include="FLUTF.cpp">
       <Filter>Game</Filter>
     </ClCompile>
@@ -150,13 +153,15 @@
     <ClInclude Include="Init.hpp">
       <Filter>Frontend</Filter>
     </ClInclude>
+    <ClInclude Include="Star.hpp">
+      <Filter>Game</Filter>
+    </ClInclude>
     <ClInclude Include="CStringRefLess.hpp">
       <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="Constants.hpp">
       <Filter>Game</Filter>
     </ClInclude>
-    <ClInclude Include="Star.hpp">
     <ClInclude Include="ShipTypes.hpp">
       <Filter>Game</Filter>
     </ClInclude>
@@ -166,6 +171,7 @@
     <ClInclude Include="Mesh.hpp">
       <Filter>Frontend\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="FLModel.hpp">
       <Filter>Game</Filter>
     </ClInclude>
   </ItemGroup>
@@ -193,17 +199,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Model-Frag.glsl">
-      <Filter>Frontend\Graphics\Shaders\Model</Filter>
-    </Text>
-    <Text Include="Model-Vert.glsl">
-      <Filter>Frontend\Graphics\Shaders\Model</Filter>
-    </Text>
-    <Text Include="Starfield-Frag.glsl">
-      <Filter>Frontend\Graphics\Shaders\Starfield</Filter>
-    </Text>
-    <Text Include="Starfield-Vert.glsl">
-      <Filter>Frontend\Graphics\Shaders\Starfield</Filter>
-    </Text>
+    <CustomBuild Include="Model-Frag.glsl" />
+    <CustomBuild Include="Model-Vert.glsl" />
+    <CustomBuild Include="Starfield-Frag.glsl" />
+    <CustomBuild Include="Starfield-Vert.glsl" />
   </ItemGroup>
 </Project>

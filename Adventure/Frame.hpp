@@ -27,6 +27,12 @@ namespace Ad
   class Frame
   {
     friend class Renderer;
+    
+    v3f camera_pos [2];
+    vsf camera_ori;
+
+    float camera_near [2],
+          camera_far  [2];
 
     struct ModelItem
     {
@@ -39,12 +45,6 @@ namespace Ad
       vsf  rot;
       v3f  scale;
     };
-
-    v3f camera_pos [2];
-    vsf camera_ori;
-
-    float camera_near [2],
-          camera_far  [2];
 
     std::vector <Mesh> mesh_items;
     std::vector <ModelItem> model_items;

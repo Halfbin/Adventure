@@ -13,12 +13,14 @@ namespace Ad
   class Entity
   {
   protected:
-    v3f pos;
+    v3i solar_pos;
+    v3f field_pos;
     vsf ori;
     v3f bbox_mins, bbox_maxs;
 
-    Entity (v3f new_pos, vsf new_ori) :
-      pos (new_pos),
+    Entity (v3i new_solar_pos, v3f new_field_pos, vsf new_ori) :
+      solar_pos (new_solar_pos),
+      field_pos (new_field_pos),
       ori (new_ori)
     { }
 
@@ -31,11 +33,12 @@ namespace Ad
 
     virtual ~Entity () = 0;
 
-    v3f position () const { return pos; }
-    vsf orientation () const { return ori; }
+    v3i solar_position () const { return solar_pos; }
+    v3f field_position () const { return field_pos; }
+    vsf orientation    () const { return ori; }
 
-    v3f bound_mins () const { return pos + bbox_mins; }
-    v3f bound_maxs () const { return pos + bbox_maxs; }
+    v3f bound_mins () const { return field_pos + bbox_mins; }
+    v3f bound_maxs () const { return field_pos + bbox_maxs; }
 
   };
 

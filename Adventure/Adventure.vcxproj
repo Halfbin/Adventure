@@ -131,6 +131,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="FLModel.cpp" />
     <ClCompile Include="FLUTF.cpp" />
     <ClCompile Include="GLContext.cpp" />
     <ClCompile Include="Entity.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="Clock.hpp" />
     <ClInclude Include="Constants.hpp" />
     <ClInclude Include="CStringRefLess.hpp" />
+    <ClInclude Include="FLModel.hpp" />
     <ClInclude Include="FLUTF.hpp" />
     <ClInclude Include="Frontend.hpp" />
     <ClInclude Include="GLContext.hpp" />

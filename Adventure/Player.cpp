@@ -5,6 +5,7 @@
 #include "Player.hpp"
 
 #include "Constants.hpp"
+#include "FLModel.hpp"
 #include "Texture.hpp"
 
 #include <Rk/clamp.hpp>
@@ -32,28 +33,39 @@ namespace Ad
   class PlayerImpl :
     public Player
   {
-    v3f solar_pos;
+    Model model;
+
+    float cam_log_dist,
+          cam_elevation;
+    vsf   cam_azimuth,
+          cam_ori;
+
     v3f prev_pos;
     v3f speed;
     v3f dir;
     float rolling;
-    Key forward_key, left_key, back_key, right_key, drop_key, rise_key, cw_key, ccw_key;
+    Key forward_key, left_key, back_key, right_key, drop_key, rise_key/*, cw_key, ccw_key*/;
 
     void input (const InputContext& ctx)
     {
       using namespace Keys;
 
       // Rotate
-      auto cw  = ctx.keys [cw_key ],
+      /*auto cw  = ctx.keys [cw_key ],
            ccw = ctx.keys [ccw_key];
 
-      key_axis (rolling, cw, ccw);
+      key_axis (rolling, cw, ccw);*/
 
-      vsf roll  = Rk::rotation ( 0.020f * rolling,       v3f (1, 0, 0));
-      vsf pitch = Rk::rotation ( 0.001f * ctx.pointer.y, v3f (0, 1, 0));
-      vsf yaw   = Rk::rotation (-0.001f * ctx.pointer.x, v3f (0, 0, 1));
+      //vsf roll  = Rk::rotation ( 0.020f * rolling,       v3f (1, 0, 0));
 
-      ori = unit (ori * roll * pitch * yaw);
+      cam_log_dist = Rk::clamp (cam_log_dist + ctx.wheel * 0.001f, 1.0f, 10.0f);
+
+      cam_elevation = Rk::clamp (cam_elevation + 0.001f * ctx.pointer.y, -1.5f, 1.5f);
+      cam_azimuth = Rk::unit (cam_azimuth * Rk::rotation (-0.001f * ctx.pointer.x, v3f {0,0,1}));
+
+      vsf pitch = Rk::rotation (cam_elevation, Rk::conj (cam_azimuth, v3f {0,1,0}));
+      
+      cam_ori = pitch * cam_azimuth;
 
       // Translate
       auto forward = ctx.keys [forward_key],
@@ -70,39 +82,46 @@ namespace Ad
 
     void advance (float time, float step)
     {
-      prev_pos = pos;
+      prev_pos = field_pos;
       auto vel = Rk::conj (ori, speed * unit (dir));
-      pos += vel * step;
+      field_pos += vel * step;
     }
 
     void draw (Frame& frame)
     {
-      v3f eye_off { 0, 0, 0 };
-      auto draw_pos = Rk::lerp (prev_pos, pos, frame.alpha);
-      frame.set_camera (solar_pos + pos, 100.f, 1000000.f, pos + eye_off, 0.1f, 1000.f, ori);
+      auto cam_dist = powf (10.0f, cam_log_dist);
+      auto eye_off = Rk::conj (cam_ori, v3f {-cam_dist, 0, 0});
+      auto draw_pos = Rk::lerp (prev_pos, field_pos, frame.alpha);
+      frame.set_camera (solar_pos + (draw_pos + eye_off) / solar_scale, 100.f, 1000000.f, draw_pos + eye_off, 0.1f, 1000.f, cam_ori);
+
+      frame.draw (layer_field, model.geom (), model.meshes_begin (), model.mesh_count (), draw_pos, ori);
     }
 
     void collide (v3f normal, float pdist)
     {
-      pos += normal * pdist;
+      field_pos += normal * pdist;
       if (dot (dir, normal) < 0)
         dir = nil;
     }
 
   public:
-    PlayerImpl () :
-      Player ({-15,0,5}, identity)
+    PlayerImpl (const InitContext& init, const ShipType& ship, v3i new_spos, v3f new_fpos, vsf new_ori) :
+      Player (new_spos, new_fpos, new_ori)
     {
+      cam_log_dist = 1.0f;
+      cam_elevation = 0.0f;
+      cam_azimuth = identity;
+
+      model = load_fl_cmp (init, ship.model_path);
+
       bbox_mins = {-0.4f,-0.4f, 0.0f};
       bbox_maxs = { 0.4f, 0.4f, 1.8f};
 
-      solar_pos = {2000.f, 0.f, 0.f};
-
-      prev_pos = pos;
+      prev_pos = new_fpos;
       dir = nil;
       rolling = 0.0f;
 
-      speed = {10,4,4};
+      speed = {100, 40, 40};
 
       using namespace Keys;
       forward_key = alpha_w;
@@ -111,17 +130,17 @@ namespace Ad
       right_key   = alpha_d;
       drop_key    = lt_ctrl;
       rise_key    = spacebar;
-      cw_key      = alpha_e;
-      ccw_key     = alpha_q;
+      //cw_key      = alpha_e;
+      //ccw_key     = alpha_q;
     }
 
     ~PlayerImpl () = default;
 
   };
 
-  Player::Ptr create_player ()
+  Player::Ptr create_player (const InitContext& init, const ShipType& ship, v3i spos, v3f fpos, vsf ori)
   {
-    return std::make_unique <PlayerImpl> ();
+    return std::make_unique <PlayerImpl> (init, ship, spos, fpos, ori);
   }
 
 }

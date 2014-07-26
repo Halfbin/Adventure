@@ -5,7 +5,10 @@
 #pragma once
 
 #include "Entity.hpp"
+
+#include "ShipTypes.hpp"
 #include "Input.hpp"
+#include "Init.hpp"
 
 namespace Ad
 {
@@ -13,8 +16,8 @@ namespace Ad
     public Entity
   {
   protected:
-    Player (v3f pos, vsf ori) :
-      Entity (pos, ori)
+    Player (v3i spos, v3f fpos, vsf ori) :
+      Entity (spos, fpos, ori)
     { }
 
   public:
@@ -24,6 +27,6 @@ namespace Ad
 
   };
 
-  Player::Ptr create_player ();
+  Player::Ptr create_player (const InitContext& init, const ShipType& ship, v3i spos, v3f fpos, vsf ori);
 
 }
