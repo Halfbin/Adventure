@@ -8,7 +8,7 @@
 
 namespace Ad
 {
-  Geom::Geom (const Attrib* attribs, uint count, uint idx_buf, uint new_idx_count, uint new_idx_type) :
+  Geom::Geom (const Attrib* attribs, size_t count, uint idx_buf, uint new_idx_count, uint new_idx_type) :
     idx_type  (new_idx_type),
     idx_count (new_idx_count)
   {

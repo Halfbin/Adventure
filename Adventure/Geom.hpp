@@ -56,10 +56,10 @@ namespace Ad
       return *this;
     }
 
-    Geom (const Attrib* attribs, uint count, uint index_buffer, uint indx_count, uint index_type);
+    Geom (const Attrib* attribs, size_t count, uint index_buffer, uint indx_count, uint index_type);
 
     Geom (std::initializer_list <Attrib> attribs, uint index_buffer, uint index_count, uint index_type) :
-      Geom (attribs.begin (), (uint) attribs.size (), index_buffer, index_count, index_type)
+      Geom (attribs.begin (), attribs.size (), index_buffer, index_count, index_type)
     { }
 
     ~Geom ()
