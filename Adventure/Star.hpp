@@ -8,6 +8,6 @@
 
 namespace Ad
 {
-  Entity::Ptr make_star (v3f pos, vsf ori);
+  Entity::Ptr make_star (v3i new_spos, vsf new_ori);
 
 }

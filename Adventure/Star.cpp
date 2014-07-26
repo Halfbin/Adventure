@@ -54,8 +54,8 @@ namespace Ad
     Geom geom;
 
   public:
-    Star (v3f new_pos, vsf new_ori) :
-      Entity (new_pos, new_ori)
+    Star (v3i new_spos, vsf new_ori) :
+      Entity (new_spos, {0, 0, 0}, new_ori)
     {
       geom = make_gusher ();
     }
@@ -64,9 +64,9 @@ namespace Ad
 
   };
 
-  Entity::Ptr make_star (v3f pos, vsf ori)
+  Entity::Ptr make_star (v3i new_spos, vsf new_ori)
   {
-    return std::make_unique <Star> (pos, ori);
+    return std::make_unique <Star> (new_spos, new_ori);
   }
 
 }
