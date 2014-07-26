@@ -67,6 +67,9 @@
     <ClCompile Include="Star.cpp">
       <Filter>Game</Filter>
     </ClCompile>
+    <ClCompile Include="FLUTF.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Gusher.hpp">
@@ -151,6 +154,9 @@
       <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="Star.hpp">
+    <ClInclude Include="FLUTF.hpp">
+      <Filter>Game</Filter>
+    </ClInclude>
       <Filter>Game</Filter>
     </ClInclude>
   </ItemGroup>
