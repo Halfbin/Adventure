@@ -189,7 +189,7 @@ namespace Ad
       {
         if (is_button_down (ev, Buttons::left))
           ctx.frontend.enter_mouse_look ();
-        else if (is_key_up (ev, Keys::escape))
+        else if (is_button_up (ev, Buttons::left))
           ctx.frontend.leave_mouse_look ();
       }
 
