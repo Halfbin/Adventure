@@ -97,7 +97,7 @@ namespace Ad
         WGL_DEPTH_BITS_ARB,     16,
         WGL_DOUBLE_BUFFER_ARB,  true,
         WGL_SAMPLE_BUFFERS_ARB, true,
-        WGL_SAMPLES_ARB,        4,
+        WGL_SAMPLES_ARB,        8,
         0, 0
       };
 

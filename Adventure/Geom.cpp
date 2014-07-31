@@ -8,8 +8,8 @@
 
 namespace Ad
 {
-  Geom::Geom (const Attrib* attribs, size_t count, uint idx_buf, uint new_idx_count, uint new_idx_type) :
-    idx_type  (new_idx_type),
+  Geom::Geom (const Attrib* attribs, size_t count, uint idx_buf, uint new_idx_count, uint new_idx_size) :
+    idx_size  (new_idx_size),
     idx_count (new_idx_count)
   {
     glGenVertexArrays (1, &vao_name);
@@ -38,6 +38,16 @@ namespace Ad
   {
     if (vao_name != 0)
       glDeleteVertexArrays (1, &vao_name);
+  }
+
+  uint Geom::index_type () const
+  {
+    switch (idx_size)
+    {
+      case 1: return GL_UNSIGNED_BYTE;
+      case 2: return GL_UNSIGNED_SHORT;
+      case 4: return GL_UNSIGNED_INT;
+    }
   }
 
 }

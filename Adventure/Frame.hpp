@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "Model.hpp"
 #include "Geom.hpp"
 #include "Mesh.hpp"
 
@@ -31,14 +32,13 @@ namespace Ad
     v3f camera_pos [2];
     vsf camera_ori;
 
-    float camera_near [2],
+    float camera_fov,
+          camera_near [2],
           camera_far  [2];
 
-    struct ModelItem
+    struct MeshItem
     {
       uint layer,
-           geom,
-           idx_type,
            first_mesh,
            mesh_count;
       v3f  trn;
@@ -46,8 +46,8 @@ namespace Ad
       v3f  scale;
     };
 
-    std::vector <Mesh> mesh_items;
-    std::vector <ModelItem> model_items;
+    std::vector <Mesh>     mesh_buffer;
+    std::vector <MeshItem> mesh_items;
 
     uint starfield_geom,
          starfield_size;
@@ -61,8 +61,9 @@ namespace Ad
 
     vec4f clear_colour;
 
-    void set_camera (v3f pos_solar, float zns, float zfs, v3f pos_field, float znf, float zff, vsf ori)
+    void set_camera (float fov, v3f pos_solar, float zns, float zfs, v3f pos_field, float znf, float zff, vsf ori)
     {
+      camera_fov = fov;
       camera_pos  [layer_solar] = pos_solar;
       camera_pos  [layer_field] = pos_field;
       camera_near [layer_solar] = zns;
@@ -89,31 +90,28 @@ namespace Ad
 
     void draw (
       FrameLayer layer,
-      const Geom& geom, 
       const Mesh* meshes,
       size_t mesh_count,
       v3f translate,
       vsf rotate = identity,
       v3f scale = { 1.f, 1.f, 1.f })
     {
-      auto first_mesh = mesh_items.size ();
-      mesh_items.insert (mesh_items.end (), meshes, meshes + mesh_count);
+      auto first_mesh = mesh_buffer.size ();
+      mesh_buffer.insert (mesh_buffer.end (), meshes, meshes + mesh_count);
 
-      model_items.push_back (
-        ModelItem { layer, geom.name (), geom.index_type (), (uint) first_mesh, (uint) mesh_count, translate, rotate, scale }
+      mesh_items.push_back (
+        MeshItem { layer, (uint) first_mesh, (uint) mesh_count, translate, rotate, scale }
       );
     }
 
     void draw (
       FrameLayer layer,
-      const Geom& geom, 
-      uint prim_type,
+      const Model& model,
       v3f translate,
       vsf rotate = identity,
       v3f scale = { 1.f, 1.f, 1.f })
     {
-      Mesh mesh { prim_type, 0, 0, geom.index_count () };
-      draw (layer, geom, &mesh, 1, translate, rotate, scale);
+      draw (layer, model.meshes_begin (), model.mesh_count (), translate, rotate, scale);
     }
 
   };

@@ -11,8 +11,9 @@
 #include "Texture.hpp"
 #include "Buffer.hpp"
 #include "Player.hpp"
+#include "Solar.hpp"
 #include "Geom.hpp"
-#include "Star.hpp"
+#include "Grab.hpp"
 #include "INI.hpp"
 
 #include <iomanip>
@@ -26,55 +27,14 @@ namespace Ad
 {
   namespace
   {
-    // shit.
-    void grab_int (int& value, Rk::cstring_ref src, int min = INT_MIN, int max = INT_MAX)
+    template <typename map_t, typename key_t, typename def_t>
+    auto find_or (const map_t& map, key_t&& key, def_t&& def)
+      -> typename map_t::mapped_type
     {
-      auto str = Rk::to_string (src);
-      std::istringstream ss (str);
-      ss >> value;
-      if (ss.bad () || !ss.eof ())
-        throw std::runtime_error ("Error parsing int in INI");
-      if (value < min || value > max)
-        throw std::runtime_error ("Integer out-of-range in INI");
-    }
-
-    void grab_float (float& value, Rk::cstring_ref src, float min = -FLT_MAX, float max = FLT_MAX)
-    {
-      auto str = Rk::to_string (src);
-      std::istringstream ss (str);
-      ss >> value;
-      if (ss.bad () || !ss.eof ())
-        throw std::runtime_error ("Error parsing float in INI");
-      if (value < min || value > max)
-        throw std::runtime_error ("Float out-of-range in INI");
-    }
-
-    void grab_v3i (v3i& value, Rk::cstring_ref src, v3i mins = v3i {INT_MIN,INT_MIN,INT_MIN}, v3i maxs = v3i {INT_MAX,INT_MAX,INT_MAX})
-    {
-      auto str = Rk::to_string (src);
-      std::istringstream ss (str);
-      ss.setf (ss.skipws);
-      ss >> value.x; ss.ignore (5000, ',');
-      ss >> value.y; ss.ignore (5000, ',');
-      ss >> value.z;
-      if (ss.bad () || !ss.eof ())
-        throw std::runtime_error ("Error parsing v3i in INI");
-      if (Rk::inner (std::logical_or <> (), std::less <> (), value, mins) || Rk::inner (std::logical_or <> (), std::greater <> (), value, maxs))
-        throw std::runtime_error ("v3i out-of-range in INI");
-    }
-
-    void grab_v3f (v3f& value, Rk::cstring_ref src, v3f mins = v3f {-FLT_MAX,-FLT_MAX,-FLT_MAX}, v3f maxs = v3f {FLT_MAX,FLT_MAX,FLT_MAX})
-    {
-      auto str = Rk::to_string (src);
-      std::istringstream ss (str);
-      ss.setf (ss.skipws);
-      ss >> value.x; ss.ignore (5000, ',');
-      ss >> value.y; ss.ignore (5000, ',');
-      ss >> value.z;
-      if (ss.bad () || !ss.eof ())
-        throw std::runtime_error ("Error parsing v3f in INI");
-      if (Rk::inner (std::logical_or <> (), std::less <> (), value, mins) || Rk::inner (std::logical_or <> (), std::greater <> (), value, maxs))
-        throw std::runtime_error ("v3f out-of-range in INI");
+      auto iter = map.find (std::forward <key_t> (key));
+      if (iter == map.end ())
+        return std::forward <def_t> (def);
+      return iter->second;
     }
 
   }
@@ -167,9 +127,18 @@ namespace Ad
   {
     UniverseCfg universe_cfg;
     ShipTypes ship_types;
-    std::map <std::string, v3f> points;
+    std::map <Rk::cstring_ref, SolarType*, CStringRefLess> solar_types;
+
+    struct Point
+    {
+      v3i field;
+      v3f pos;
+    };
+
+    std::map <std::string, Point> points;
 
     Player::Ptr player;
+    std::vector <Solar> solars;
     std::vector <Entity::Ptr> entities;
     CollisionState collide;
 
@@ -205,15 +174,15 @@ namespace Ad
 
       for (auto&& ent : entities)
       {
-        ent -> advance (time, step);
+        ent->advance (time, step);
         collide.add_ent (ent.get ());
       }
 
-      player -> advance (time, step);
+      player->advance (time, step);
       collide.add_ent (player.get ());
 
       for (auto ev : collide.find_collisions ())
-        ev.ent -> collide (ev.normal, ev.pdist);
+        ev.ent->collide (ev.normal, ev.pdist);
     }
 
     void render (Frame& frame)
@@ -221,10 +190,13 @@ namespace Ad
       frame.clear_colour = background_colour;
       frame.set_starfield (starfield);
 
-      for (auto&& ent : entities)
-        ent -> draw (frame);
+      for (auto&& solar : solars)
+        solar.draw (frame);
 
-      player -> draw (frame);
+      for (auto&& ent : entities)
+        ent->draw (frame);
+
+      player->draw (frame);
     }
 
     void configure_starfield (INILoader& ini)
@@ -264,46 +236,55 @@ namespace Ad
       background_colour = compose_vector (bgcol / 255.0f, 1.0f);
     }
 
-    void configure_ent (INILoader& ini)
+    SolarFactory::Ptr make_solar_factory (Rk::cstring_ref type_name)
     {
-      vec3i pos = {0,0,0};
-      vec3f rot = {0,0,0};
-      Rk::cstring_ref name;
+      auto type = find_or (solar_types, type_name, nullptr);
+      if (!type)
+        return nullptr;
+      return type->make_factory ();
+    }
+
+    void configure_solar (INILoader& ini)
+    {
+      std::vector <std::pair <Rk::cstring_ref, Rk::cstring_ref>> params;
+      SolarFactory::Ptr factory;
 
       INIStatus stat;
       while ((stat = ini.proceed ()) == INIStatus::got_pair)
       {
-        if (ini.key () == "name")
-          name = ini.value ();
-        else if (ini.key () == "pos")
-          grab_v3i (pos, ini.value ());
-        else if (ini.key () == "rot")
-          grab_v3f (rot, ini.value ());
+        if (ini.key () == "type" && !factory)
+          factory = make_solar_factory (ini.value ());
+        else
+          params.push_back (std::make_pair (ini.key (), ini.value ()));
       }
 
-      static const float d2r = 0.01745329251f;
-      vsf ori = Rk::rotation (d2r * rot.x, v3f {1,0,0})
-              * Rk::rotation (d2r * rot.y, v3f {0,1,0})
-              * Rk::rotation (d2r * rot.z, v3f {0,0,1});
+      if (!factory)
+        throw std::runtime_error ("Solar with no type");
 
-      add_entity (make_star (pos, ori));
+      for (const auto param : params)
+        factory->param (param.first, param.second);
+
+      solars.push_back (factory->create ());
     }
 
     void configure_point (INILoader& ini)
     {
       std::string name;
-      vec3f pos = {0,0,0};
+      v3i field = {0,0,0};
+      v3f pos = {0,0,0};
 
       INIStatus stat;
       while ((stat = ini.proceed ()) == INIStatus::got_pair)
       {
         if (ini.key () == "name")
           name = to_string (ini.value ());
+        else if (ini.key () == "field")
+          grab_v3i (field, ini.value ());
         else if (ini.key () == "pos")
           grab_v3f (pos, ini.value ());
       }
 
-      points [name] = pos;
+      points [name] = Point { field, pos };
     }
 
   public:
@@ -311,6 +292,9 @@ namespace Ad
       universe_cfg (load_universe (ctx, "Universe/universe.ini")),
       ship_types (load_ship_types (ctx, "Ships/ShipTypes.ini"))
     {
+      for (auto ty = SolarType::head (); ty; ty = ty->next ())
+        solar_types.insert (std::make_pair (ty->name (), ty));
+
       background_colour = nil;
 
       auto start_sys = universe_cfg [universe_cfg.start_system ()];
@@ -326,20 +310,20 @@ namespace Ad
           configure_starfield (ini);
         else if (ini.section () == "Background")
           configure_background (ini);
-        else if (ini.section () == "Entity")
-          configure_ent (ini);
+        else if (ini.section () == "Solar")
+          configure_solar (ini);
         else if (ini.section () == "Point")
           configure_point (ini);
       }
 
       auto start_ship = ship_types [universe_cfg.start_ship_type ()];
 
-      v3f player_pos = {0,0,0};
+      Point player_pos = { nil, nil };
       auto iter = points.find ("spawn");
       if (iter != points.end ())
         player_pos = iter->second;
 
-      player = create_player (ctx, start_ship, {0,0,0}, player_pos, identity);
+      player = create_player (ctx, start_ship, player_pos.field, player_pos.pos, identity);
     }
 
     ~PlayPhase () = default;

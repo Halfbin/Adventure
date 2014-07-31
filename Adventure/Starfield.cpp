@@ -48,9 +48,9 @@ namespace Ad
         float dim = Rk::clamp (r, 0.0f, 1.0f);
 
         star.col = v4f {
-          dim * (0.7f + 0.3f * uni_dist (gen)),
-          dim * (0.7f + 0.3f * uni_dist (gen)),
-          dim * (0.7f + 0.3f * uni_dist (gen)),
+          dim * (0.6f + 0.4f * uni_dist (gen)),
+          dim * (0.6f + 0.4f * uni_dist (gen)),
+          dim * (0.6f + 0.4f * uni_dist (gen)),
           r   
         };
       }

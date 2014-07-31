@@ -5,6 +5,7 @@
 #include "FLModel.hpp"
 
 #include <Rk/file_stream.hpp>
+#include <Rk/vector.hpp>
 
 #include <vector>
 #include <map>
@@ -317,7 +318,16 @@ namespace Ad
 
         auto num_vertices = last_vertex - first_vertex + 1;
 
-        out_meshes.push_back (Mesh { GL_TRIANGLES, relevant_vertices, relevant_indices, num_indices });
+        out_meshes.emplace_back (
+          0, // assign later
+          GL_UNSIGNED_SHORT,
+          GL_TRIANGLES,
+          relevant_vertices,
+          relevant_vertices + num_vertices,
+          relevant_indices * 2,
+          num_indices,
+          0
+        );
 
         relevant_vertices += num_vertices;
         relevant_indices  += num_indices;
@@ -359,12 +369,17 @@ namespace Ad
         { ModelShader::attrib_tcoords, vertices.name (), 2, GL_FLOAT, vertex_size, tex_off }
       };
 
-      Geom geom (attribs, 3, indices.name (), relevant_indices, GL_UNSIGNED_SHORT);
+      std::vector <Geom> geoms;
+      geoms.emplace_back (attribs, 3, indices.name (), relevant_indices, 2);
 
       vertices.release ();
       indices.release ();
 
-      return Model (std::move (geom), std::move (out_meshes));
+      // Assign geom name to meshes
+      for (auto& mesh : out_meshes)
+        mesh.geom = geoms [0].name ();
+
+      return Model (std::move (geoms), std::move (out_meshes));
     }
 
   };

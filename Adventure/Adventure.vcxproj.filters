@@ -4,15 +4,6 @@
     <ClCompile Include="Gusher.cpp">
       <Filter>Game</Filter>
     </ClCompile>
-    <ClCompile Include="Menu.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Play.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
     <ClCompile Include="Geom.cpp">
       <Filter>Frontend\Graphics</Filter>
     </ClCompile>
@@ -37,9 +28,6 @@
     <ClCompile Include="Window.cpp">
       <Filter>Frontend</Filter>
     </ClCompile>
-    <ClCompile Include="Entity.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
     <ClCompile Include="InputSystem.cpp">
       <Filter>Frontend\Input</Filter>
     </ClCompile>
@@ -58,27 +46,45 @@
     <ClCompile Include="INI.cpp">
       <Filter>Frontend</Filter>
     </ClCompile>
-    <ClCompile Include="Universe.cpp">
-      <Filter>Game</Filter>
+    <ClCompile Include="Entity.cpp">
+      <Filter>Game\Entities</Filter>
     </ClCompile>
-    <ClCompile Include="Star.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
-    <ClCompile Include="ShipTypes.cpp">
-      <Filter>Game</Filter>
+    <ClCompile Include="Player.cpp">
+      <Filter>Game\Entities</Filter>
     </ClCompile>
     <ClCompile Include="FLModel.cpp">
-      <Filter>Game</Filter>
+      <Filter>Game\FL</Filter>
     </ClCompile>
     <ClCompile Include="FLUTF.cpp">
-      <Filter>Game</Filter>
+      <Filter>Game\FL</Filter>
+    </ClCompile>
+    <ClCompile Include="Play.cpp">
+      <Filter>Game\Phase</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu.cpp">
+      <Filter>Game\Phase</Filter>
+    </ClCompile>
+    <ClCompile Include="Solar.cpp">
+      <Filter>Game\Solar</Filter>
+    </ClCompile>
+    <ClCompile Include="Star.cpp">
+      <Filter>Game\Solar</Filter>
+    </ClCompile>
+    <ClCompile Include="Grab.cpp">
+      <Filter>Game\Config</Filter>
+    </ClCompile>
+    <ClCompile Include="ShipTypes.cpp">
+      <Filter>Game\Config</Filter>
+    </ClCompile>
+    <ClCompile Include="Universe.cpp">
+      <Filter>Game\Config</Filter>
+    </ClCompile>
+    <ClCompile Include="RkModel.cpp">
+      <Filter>Game\RkModel</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Gusher.hpp">
-      <Filter>Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.hpp">
       <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="Buffer.hpp">
@@ -111,12 +117,6 @@
     <ClInclude Include="Window.hpp">
       <Filter>Frontend</Filter>
     </ClInclude>
-    <ClInclude Include="Entity.hpp">
-      <Filter>Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Phase.hpp">
-      <Filter>Game</Filter>
-    </ClInclude>
     <ClInclude Include="Frontend.hpp">
       <Filter>Frontend</Filter>
     </ClInclude>
@@ -147,32 +147,47 @@
     <ClInclude Include="INI.hpp">
       <Filter>Frontend</Filter>
     </ClInclude>
-    <ClInclude Include="Universe.hpp">
-      <Filter>Game</Filter>
-    </ClInclude>
     <ClInclude Include="Init.hpp">
       <Filter>Frontend</Filter>
     </ClInclude>
-    <ClInclude Include="Star.hpp">
-      <Filter>Game</Filter>
-    </ClInclude>
     <ClInclude Include="CStringRefLess.hpp">
-      <Filter>Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Constants.hpp">
-      <Filter>Game</Filter>
-    </ClInclude>
-    <ClInclude Include="ShipTypes.hpp">
-      <Filter>Game</Filter>
-    </ClInclude>
-    <ClInclude Include="FLUTF.hpp">
       <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="Mesh.hpp">
       <Filter>Frontend\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Entity.hpp">
+      <Filter>Game\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.hpp">
+      <Filter>Game\Entities</Filter>
+    </ClInclude>
     <ClInclude Include="FLModel.hpp">
-      <Filter>Game</Filter>
+      <Filter>Game\FL</Filter>
+    </ClInclude>
+    <ClInclude Include="FLUTF.hpp">
+      <Filter>Game\FL</Filter>
+    </ClInclude>
+    <ClInclude Include="Phase.hpp">
+      <Filter>Game\Phase</Filter>
+    </ClInclude>
+    <ClInclude Include="Solar.hpp">
+      <Filter>Game\Solar</Filter>
+    </ClInclude>
+    <ClInclude Include="Grab.hpp">
+      <Filter>Game\Config</Filter>
+    </ClInclude>
+    <ClInclude Include="Constants.hpp">
+      <Filter>Game\Config</Filter>
+    </ClInclude>
+    <ClInclude Include="ShipTypes.hpp">
+      <Filter>Game\Config</Filter>
+    </ClInclude>
+    <ClInclude Include="Universe.hpp">
+      <Filter>Game\Config</Filter>
+    </ClInclude>
+    <ClInclude Include="RkModel.hpp">
+      <Filter>Game\RkModel</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -196,6 +211,24 @@
     </Filter>
     <Filter Include="Frontend\Graphics\Shaders\Starfield">
       <UniqueIdentifier>{0c4c4704-13fd-4b01-a032-99453b295a30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Entities">
+      <UniqueIdentifier>{ffde755b-a473-4b8c-a9d1-53bb50baa5f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\FL">
+      <UniqueIdentifier>{c35a3d88-ea2b-4a1c-a754-50768d8d1d8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Phase">
+      <UniqueIdentifier>{ded01bc4-c451-4202-90c1-283190c4b45e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Solar">
+      <UniqueIdentifier>{d7cf2cd9-5a4a-4b9a-9648-5e84b6cda9f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Config">
+      <UniqueIdentifier>{31ad0c04-3c7b-47c6-a286-44313024a4ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\RkModel">
+      <UniqueIdentifier>{90436089-f0ce-4e1e-916d-2bedfcca3da0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -40,35 +40,53 @@ namespace Ad
     vsf   cam_azimuth,
           cam_ori;
 
+    float pitching, yawing, rolling;
+
     v3f prev_pos;
     v3f speed;
     v3f dir;
-    float rolling;
-    Key forward_key, left_key, back_key, right_key, drop_key, rise_key/*, cw_key, ccw_key*/;
+    
+    Key pitch_forward_key, pitch_back_key,
+        rudder_left_key,   rudder_right_key,
+        roll_cw_key,       roll_ccw_key;
 
     void input (const InputContext& ctx)
     {
       using namespace Keys;
 
       // Rotate
-      /*auto cw  = ctx.keys [cw_key ],
-           ccw = ctx.keys [ccw_key];
+      auto pitchf = ctx.keys [pitch_forward_key],
+           pitchb = ctx.keys [pitch_back_key],
+           rudl   = ctx.keys [rudder_left_key],
+           rudr   = ctx.keys [rudder_right_key],
+           rollcw = ctx.keys [roll_cw_key ],
+           rollac = ctx.keys [roll_ccw_key];
 
-      key_axis (rolling, cw, ccw);*/
+      key_axis (pitching, pitchf, pitchb);
+      key_axis (yawing,   rudl,   rudr);
+      key_axis (rolling,  rollcw, rollac);
 
-      //vsf roll  = Rk::rotation ( 0.020f * rolling,       v3f (1, 0, 0));
+      vsf pitch = Rk::rotation (0.020f * pitching, v3f (0, 1, 0)),
+          yaw   = Rk::rotation (0.020f * yawing,   v3f (0, 0, 1)),
+          roll  = Rk::rotation (0.020f * rolling,  v3f (1, 0, 0));
 
-      cam_log_dist = Rk::clamp (cam_log_dist + ctx.wheel * 0.001f, 1.0f, 10.0f);
+      ori = Rk::unit (ori * pitch * yaw * roll);
+
+      cam_log_dist = Rk::clamp (cam_log_dist + ctx.wheel * 0.001f, 1.4f, 10.0f);
 
       cam_elevation = Rk::clamp (cam_elevation + 0.001f * ctx.pointer.y, -1.5f, 1.5f);
       cam_azimuth = Rk::unit (cam_azimuth * Rk::rotation (-0.001f * ctx.pointer.x, v3f {0,0,1}));
 
-      vsf pitch = Rk::rotation (cam_elevation, Rk::conj (cam_azimuth, v3f {0,1,0}));
-      
-      cam_ori = pitch * cam_azimuth;
+      /*vsf cam_pitch = Rk::rotation (cam_elevation, Rk::conj (cam_azimuth, v3f {0,1,0}));
+
+      cam_ori = cam_pitch * cam_azimuth;*/
+
+      vsf cam_pitch = Rk::rotation (cam_elevation, v3f {0,1,0});
+
+      cam_ori = cam_azimuth * cam_pitch;
 
       // Translate
-      auto forward = ctx.keys [forward_key],
+    /*auto forward = ctx.keys [forward_key],
            left    = ctx.keys [left_key   ],
            back    = ctx.keys [back_key   ],
            right   = ctx.keys [right_key  ],
@@ -77,7 +95,7 @@ namespace Ad
 
       key_axis (dir.x, forward, back );
       key_axis (dir.y, left,    right);
-      key_axis (dir.z, rise,    drop );
+      key_axis (dir.z, rise,    drop );*/
     }
 
     void advance (float time, float step)
@@ -92,9 +110,11 @@ namespace Ad
       auto cam_dist = powf (10.0f, cam_log_dist);
       auto eye_off = Rk::conj (cam_ori, v3f {-cam_dist, 0, 0});
       auto draw_pos = Rk::lerp (prev_pos, field_pos, frame.alpha);
-      frame.set_camera (solar_pos + (draw_pos + eye_off) / solar_scale, 100.f, 1000000.f, draw_pos + eye_off, 0.1f, 1000.f, cam_ori);
 
-      frame.draw (layer_field, model.geom (), model.meshes_begin (), model.mesh_count (), draw_pos, ori);
+      auto s = solar_scale;
+      frame.set_camera (22.0f, solar_pos + (draw_pos + eye_off) / s, 1e2f, 1e6f, draw_pos + eye_off, 0.1f, 10000.f, cam_ori);
+
+      frame.draw (layer_field, model, draw_pos, ori);
     }
 
     void collide (v3f normal, float pdist)
@@ -108,7 +128,7 @@ namespace Ad
     PlayerImpl (const InitContext& init, const ShipType& ship, v3i new_spos, v3f new_fpos, vsf new_ori) :
       Player (new_spos, new_fpos, new_ori)
     {
-      cam_log_dist = 1.0f;
+      cam_log_dist = 1.4f;
       cam_elevation = 0.0f;
       cam_azimuth = identity;
 
@@ -117,21 +137,20 @@ namespace Ad
       bbox_mins = {-0.4f,-0.4f, 0.0f};
       bbox_maxs = { 0.4f, 0.4f, 1.8f};
 
+      pitching = yawing = rolling = 0;
+
       prev_pos = new_fpos;
       dir = nil;
-      rolling = 0.0f;
 
       speed = {100, 40, 40};
 
       using namespace Keys;
-      forward_key = alpha_w;
-      left_key    = alpha_a;
-      back_key    = alpha_s;
-      right_key   = alpha_d;
-      drop_key    = lt_ctrl;
-      rise_key    = spacebar;
-      //cw_key      = alpha_e;
-      //ccw_key     = alpha_q;
+      pitch_forward_key = alpha_w;
+      pitch_back_key    = alpha_s;
+      rudder_left_key   = alpha_q;
+      rudder_right_key  = alpha_e;
+      roll_cw_key       = alpha_d;
+      roll_ccw_key      = alpha_a;
     }
 
     ~PlayerImpl () = default;

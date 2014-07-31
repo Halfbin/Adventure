@@ -4,20 +4,23 @@
 
 #pragma once
 
-#include "Frame.hpp"
+#include <vector>
+
+#include "Geom.hpp"
+#include "Mesh.hpp"
 
 namespace Ad
 {
   struct Model
   {
-    Geom               geom_;
+    std::vector <Geom> geoms_;
     std::vector <Mesh> meshes_;
 
   public:
     Model () = default;
 
-    Model (Geom new_geom, std::vector <Mesh> new_meshes) :
-      geom_   (std::move (new_geom)),
+    Model (std::vector <Geom> new_geoms, std::vector <Mesh> new_meshes) :
+      geoms_  (std::move (new_geoms)),
       meshes_ (std::move (new_meshes))
     { }
 
@@ -25,20 +28,30 @@ namespace Ad
     Model& operator = (const Model&) = delete;
 
     Model (Model&& other) :
-      geom_   (std::move (other.geom_)),
+      geoms_  (std::move (other.geoms_)),
       meshes_ (std::move (other.meshes_))
     { }
 
     Model& operator = (Model&& other)
     {
-      geom_   = std::move (other.geom_);
+      geoms_  = std::move (other.geoms_);
       meshes_ = std::move (other.meshes_);
       return *this;
     }
 
-    const Geom& geom () const
+    size_t geom_count () const
     {
-      return geom_;
+      return geoms_.size ();
+    }
+
+    const Geom* geoms_begin () const
+    {
+      return geoms_.data ();
+    }
+
+    const Geom* geoms_end () const
+    {
+      return geoms_begin () + geom_count ();
     }
 
     size_t mesh_count () const

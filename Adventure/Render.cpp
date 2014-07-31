@@ -45,12 +45,12 @@ namespace Ad
       check_gl ("glEnableVertexAttribArray failed");*/
     }
 
-    void render_models    (const Frame& frame);
+    void render_meshes    (const Frame& frame);
     void render_starfield (const Frame& frame);
 
   };
 
-  void Renderer::Impl::render_models (const Frame& frame)
+  void Renderer::Impl::render_meshes (const Frame& frame)
   {
     model_shader.use ();
 
@@ -64,12 +64,12 @@ namespace Ad
     uint prev_layer = 0xffffffff;
     m4f world_to_clip;
 
-    for (auto item : frame.model_items)
+    for (auto item : frame.mesh_items)
     {
       if (item.layer != prev_layer)
       {
         glClear (GL_DEPTH_BUFFER_BIT);
-        auto eye_to_clip = Rk::eye_to_clip (75.0f, float (frame.width) / float (frame.height), frame.camera_near [item.layer], frame.camera_far [item.layer]);
+        auto eye_to_clip = Rk::eye_to_clip (frame.camera_fov, float (frame.width) / float (frame.height), frame.camera_near [item.layer], frame.camera_far [item.layer]);
         auto world_to_eye = Rk::world_to_eye (frame.camera_pos [item.layer], frame.camera_ori);
         world_to_clip = eye_to_clip * world_to_eye;
 
@@ -81,16 +81,17 @@ namespace Ad
       glUniformMatrix4fv (model_shader.model_to_world (), 1, true, reinterpret_cast <const float*> (&model_to_world));
       check_gl ("glUniformMatrix4fv failed");
 
-      for (int i = 0; i != 3; i++)
-      for (int j = 0; j != 3; j++)
-        model_to_world (i, j) *= item.scale [i];
+      m4f scale_model = m4f::identity ();
 
-      auto model_to_clip = world_to_clip * model_to_world;
+      for (int i = 0; i != 3; i++)
+        scale_model (i, i) *= item.scale [i];
+
+      auto model_to_clip = world_to_clip * model_to_world * scale_model;
 
       glUniformMatrix4fv (model_shader.model_to_clip (), 1, true, reinterpret_cast <const float*> (&model_to_clip));
       check_gl ("glUniformMatrix4fv failed");
 
-      v4f col { 1.0f, 0.0f, 0.0f, 1.0f };
+      v4f col { 1.0f, 1.0f, 1.0f, 1.0f };
       glVertexAttrib4fv (model_shader.attrib_colour, reinterpret_cast <const float*> (&col));
       check_gl ("glVertexAttrib4f failed");
 
@@ -99,22 +100,31 @@ namespace Ad
 
       glVertexAttrib4f (model_shader.attrib_normal, 0, 0, 0, 0);
 
-      glBindVertexArray (item.geom);
-      check_gl ("glBindVertexArray failed");
-
       for (auto i_mesh = item.first_mesh; i_mesh != item.first_mesh + item.mesh_count; i_mesh++)
       {
-        const auto& mesh = frame.mesh_items [i_mesh];
+        const auto& mesh = frame.mesh_buffer [i_mesh];
 
-        glDrawElementsBaseVertex (mesh.type, mesh.count, item.idx_type, (const void*) uptr (mesh.first * 2), mesh.base);
-        check_gl ("glDrawElements failed");
+        glBindVertexArray (mesh.geom);
+        check_gl ("glBindVertexArray failed");
+
+        glDrawRangeElementsBaseVertex (
+          mesh.prim_type,
+          mesh.vertex_base,
+          mesh.vertex_max,
+          mesh.index_count,
+          mesh.index_type,
+          (const void*) uptr (mesh.index_offset),
+          mesh.vertex_base
+        );
+
+        check_gl ("glDrawRangeElementsBaseVertex failed");
       }
     }
   }
 
   void Renderer::Impl::render_starfield (const Frame& frame)
   {
-    m4f e2c = Rk::eye_to_clip (75.0f, float (frame.width) / float (frame.height), 0.1f, 1000.0f);
+    m4f e2c = Rk::eye_to_clip (frame.camera_fov, float (frame.width) / float (frame.height), 0.1f, 1000.0f);
     m4f s2e = Rk::world_to_eye (v3f {0,0,0}, frame.camera_ori);
     auto s2c = e2c * s2e;
 
@@ -144,7 +154,8 @@ namespace Ad
     frame.height = height;
     frame.alpha  = alpha;
 
-    frame.model_items.clear ();
+    frame.mesh_items.clear ();
+    frame.mesh_buffer.clear ();
 
     frame.starfield_geom = 0;
     frame.starfield_size = 0;
@@ -172,11 +183,11 @@ namespace Ad
     glViewport (0, 0, frame.width, frame.height);
 
     // Sort models by layer, back-to-front
-    auto& models = impl->frame.model_items;
+    auto& mesh_items = impl->frame.mesh_items;
     std::sort (
-      models.begin (),
-      models.end (),
-      [] (const Frame::ModelItem& lhs, const Frame::ModelItem& rhs) { return lhs.layer < rhs.layer; }
+      mesh_items.begin (),
+      mesh_items.end (),
+      [] (const Frame::MeshItem& lhs, const Frame::MeshItem& rhs) { return lhs.layer < rhs.layer; }
     );
 
     auto cc = frame.clear_colour;
@@ -184,7 +195,7 @@ namespace Ad
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     impl -> render_starfield (frame);
 
-    impl -> render_models (frame);
+    impl -> render_meshes (frame);
     
   }
 

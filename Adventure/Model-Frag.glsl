@@ -16,7 +16,7 @@ out vec4 frag;
 void main ()
 {
   vec3 n = normalize (xformed_normal.xyz);
-  float light = clamp (n.z, 0.0, 1.0);
+  float light = clamp (-n.x, 0.0, 1.0);
   float amount = mix (1, light, xformed_normal.w);
   vec4 col = vec4 (texture (tex, xformed_tcoords).rgb + xformed_colour.rgb, xformed_colour.a);
   frag = vec4 (col.rgb * amount, col.a);

@@ -99,7 +99,7 @@ namespace Ad
 
   } // local
 
-  Geom make_gusher ()
+  Model make_gusher ()
   {
     auto mod = add_normals (gusher_verts, gusher_tris, 72);
 
@@ -117,7 +117,20 @@ namespace Ad
     data.release ();
     idxs.release ();
 
-    return geom;
+    std::vector <Mesh> meshes;
+    meshes.emplace_back (
+      geom.name (),
+      GL_UNSIGNED_BYTE,
+      GL_TRIANGLES,
+      0, (uint) mod.verts.size (),
+      0, (uint) mod.idxs.size (),
+      0
+    );
+
+    std::vector <Geom> geoms;
+    geoms.push_back (std::move (geom));
+
+    return Model (std::move (geoms), std::move (meshes));
   }
 
 }

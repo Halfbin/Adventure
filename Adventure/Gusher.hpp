@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "Geom.hpp"
+#include "Model.hpp"
 
 namespace Ad
 {
-  Geom make_gusher ();
+  Model make_gusher ();
 
 }

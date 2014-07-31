@@ -2,14 +2,56 @@
 // Adventure
 //
 
-#include "Entity.hpp"
+#include "Solar.hpp"
 
 #include "Gusher.hpp"
+#include "Grab.hpp"
 
 #include <GL/glew.h>
 
 namespace Ad
 {
+  namespace
+  {
+    class StarFactory :
+      public SolarFactory
+    {
+      int radius;
+
+      bool param (Rk::cstring_ref key, Rk::cstring_ref value)
+      {
+        if (key == "radius")
+          grab_int (radius, value, 1);
+        else
+          return SolarFactory::param (key, value);
+
+        return true;
+      }
+
+      Solar create ()
+      {
+        return Solar (make_gusher (), pos, ori, v3i {radius,radius,radius});
+      }
+
+    };
+
+    class StarType :
+      public SolarType
+    {
+      SolarFactory::Ptr make_factory ()
+      {
+        return std::make_unique <StarFactory> ();
+      }
+
+    public:
+      StarType () :
+        SolarType ("star")
+      { }
+
+    } star_type;
+
+  }
+
 /*void triangle (v3f a, v3f b, v3f c, int level, int max_level)
   {
     if (level == max_level)
@@ -29,44 +71,5 @@ namespace Ad
     triangle (c, mca, mbc, level + 1, max_level);
     triangle (mab, mbc, mca, level + 1, max_level);
   }*/
-
-
-  class Star :
-    public Entity
-  {
-    void advance (float time, float step)
-    {
-
-    }
-
-    void draw (Frame& frame)
-    {
-      // sun equatorial radius ~700 000 km = 7e8 m
-      //                                   = 7e2 su
-      frame.draw (layer_solar, geom, GL_TRIANGLES, solar_pos, ori, v3f (7e2f, 7e2f, 7e2f));
-    }
-
-    void collide (v3f normal, float pdist)
-    {
-
-    }
-
-    Geom geom;
-
-  public:
-    Star (v3i new_spos, vsf new_ori) :
-      Entity (new_spos, {0, 0, 0}, new_ori)
-    {
-      geom = make_gusher ();
-    }
-
-    ~Star () = default;
-
-  };
-
-  Entity::Ptr make_star (v3i new_spos, vsf new_ori)
-  {
-    return std::make_unique <Star> (new_spos, new_ori);
-  }
 
 }
